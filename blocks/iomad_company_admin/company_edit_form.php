@@ -121,6 +121,7 @@ if (!$new) {
                                       'compayfavicon',
                                       'companylogo',
                                       'companylogocompact',
+                                      'companyloginbackground',
                                       'currentparentid',
                                       'customcss',
                                       'headingcolor',
@@ -176,6 +177,14 @@ file_prepare_draft_area($draftcompanyfaviconid,
                         'favicon' . $companyid, 0,
                         ['maxfiles' => 1]);
 $companyrecord->companyfavicon = $draftcompanyfaviconid;
+
+$draftcompanyloginbackgroundid = file_get_submitted_draft_itemid('companyloginbackground');
+file_prepare_draft_area($draftcompanyloginbackgroundid,
+                        $context->id,
+                        'core_admin',
+                        'loginbackground' . $companyid, 0,
+                        ['maxfiles' => 1]);
+$companyrecord->companyloginbackground = $draftcompanyloginbackgroundid;
 
 // Are we creating a child company?
 if (!empty($new) && !empty($parentid)) {
@@ -266,7 +275,16 @@ if (!empty($new) && !empty($parentid)) {
                             'favicon' . $parentid, 0,
                             ['maxfiles' => 1]);
     $companyrecord->companyfavicon = $draftcompanyfaviconid;
-} else {
+
+    $draftcompanyloginbackgroundid = file_get_submitted_draft_itemid('companyloginbackground');
+    file_prepare_draft_area($draftcompanyloginbackgroundid,
+                            $context->id,
+                            'core_admin',
+                            'loginbackground' . $parentid, 0,
+                            ['maxfiles' => 1]);
+    $companyrecord->companyloginbackground = $draftcompanyloginbackgroundid;
+
+    } else {
     $draftcompanycertificatesealid = file_get_submitted_draft_itemid('companycertificateseal');
     file_prepare_draft_area($draftcompanycertificatesealid,
                             $context->id,
@@ -597,6 +615,26 @@ if ($mform->is_cancelled()) {
             set_config('favicon' . $data->id, $file->get_filepath() . $file->get_filename(), 'core_admin');
         } else {
             set_config('favicon' . $data->id, '', 'core_admin');
+        }
+    }
+    if (!empty($data->companyloginbackground)) {
+        file_save_draft_area_files($data->companyloginbackground,
+                                   $context->id,
+                                   'core_admin',
+                                   'loginbackground' . $data->id,
+                                   0,
+                                   ['maxfiles' => 1]);
+
+        // Set the plugin config so it can actually be picked up.
+        if ($files = $fs->get_area_files($context->id, 'core_admin', 'loginbackground'. $data->id)) {
+            foreach ($files as $file) {
+                if ($file->get_filename() != '.') {
+                    break;
+                }
+            }
+            set_config('loginbackground' . $data->id, $file->get_filepath() . $file->get_filename(), 'core_admin');
+        } else {
+            set_config('loginbackground' . $data->id, '', 'core_admin');
         }
     }
     if (!empty($data->companycertificateseal)) {

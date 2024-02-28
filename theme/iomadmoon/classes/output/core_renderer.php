@@ -2285,6 +2285,26 @@ class core_renderer extends \core_renderer {
             $context->loginbg = $this->page->theme->setting_file_url('loginbg', 'loginbg');
         }
 
+        global $SESSION;
+        if (!empty($SESSION->currenteditingcompany)) {
+            $loginbackground = get_config('core_admin', 'loginbackground'.$SESSION->currenteditingcompany);
+            if (!empty($loginbackground) && $loginbackground !='/.') {
+                $bgurl = moodle_url::make_pluginfile_url(\context_system::instance()->id, 'core_admin', 'loginbackground'.$SESSION->currenteditingcompany, "0/",
+                    theme_get_revision(), $loginbackground);
+                    $context->loginbg = $bgurl->out();
+                    if($this->page->theme->settings->setloginlayou ==2 || $this->page->theme->settings->setloginlayou==3){ 
+                        $context->loginlayoutimg = 1;
+                    }else{
+                        $context->customlogincss = '
+                        <style>
+                        body.path-login { 
+                            background-image: url("' .$context->loginbg .'"); background-size: cover; background-attachment: fixed;";
+                        }
+                        </style>
+                        ';
+                    }
+            }
+        }
         if (isset($this->page->theme->settings->hideforgotpassword)) {
             $context->hideforgotpassword = $this->page->theme->settings->hideforgotpassword == 1;
         }
@@ -2376,6 +2396,25 @@ class core_renderer extends \core_renderer {
             $context['loginbg'] = $url;
         }
 
+        global $SESSION;
+        if (!empty($SESSION->currenteditingcompany)) {
+            $loginbackground = get_config('core_admin', 'loginbackground'.$SESSION->currenteditingcompany);
+            if (!empty($loginbackground)  && $loginbackground !='/.') {
+                $context['loginbg'] = moodle_url::make_pluginfile_url(\context_system::instance()->id, 'core_admin', 'loginbackground'.$SESSION->currenteditingcompany, "0/",
+                    theme_get_revision(), $loginbackground);
+                    if($this->page->theme->settings->setloginlayou ==2 || $this->page->theme->settings->setloginlayou==3){ 
+                        $context['loginlayoutimg'] = 1;
+                    }else{
+                        $context['customlogincss'] = '
+                        <style>
+                        body.path-login { 
+                            background-image: url("' .$context['loginbg'] .'"); background-size: cover; background-attachment: fixed;";
+                        }
+                        </style>
+                        ';
+                    }
+            }
+        }
         if (isset($this->page->theme->settings->loginfootercontent)) {
             $context['loginfootercontent'] = format_text(($this->page->theme->settings->loginfootercontent),
                 FORMAT_HTML,

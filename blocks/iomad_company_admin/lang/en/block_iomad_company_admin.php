@@ -766,3 +766,4 @@ $string['companyreporter_role'] = 'Company report only';
 $string['companyreporter'] = 'Company report only';
 $string['xdepartmentassignments'] = '{$a}\'s departments';
 $string['xrolesassignments'] = '{$a}\'s roles';
+$string['companyloginbackground'] = 'Company Login Background Image';

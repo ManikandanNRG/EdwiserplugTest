@@ -58,7 +58,8 @@ function core_admin_pluginfile($course, $cm, $context, $filearea, $args, $forced
     // IOMAD logos and favicons have company id prepended so standard check doesn't work.
     if ("logo" === substr($filearea, 0, strlen('logo')) ||
         "logocompact" === substr($filearea, 0, strlen('logocompact')) ||
-         "favicon" === substr($filearea, 0, strlen('favicon'))) {
+         "favicon" === substr($filearea, 0, strlen('favicon'))||
+         "loginbackground" === substr($filearea, 0, strlen('loginbackground'))) {
         $size = array_shift($args); // The path hides the size.
         $itemid = clean_param(array_shift($args), PARAM_INT);
         $filename = clean_param(array_shift($args), PARAM_FILE);

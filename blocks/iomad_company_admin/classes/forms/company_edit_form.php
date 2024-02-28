@@ -465,6 +465,10 @@ class company_edit_form extends \company_moodleform {
                                     get_string('companyfavicon', 'block_iomad_company_admin'), null,
                                     ['maxfiles' => 1,
                                      'accepted_types' => ['image']]);
+                $mform->addElement('filemanager', 'companyloginbackground',
+                                     get_string('companyloginbackground', 'block_iomad_company_admin'), null,
+                                     ['maxfiles' => 1,
+                                      'accepted_types' => ['image']]);
 
                 $mform->addElement('textarea', 'customcss',
                                     get_string('customcss', 'block_iomad_company_admin'),
