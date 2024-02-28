@@ -35,7 +35,6 @@ $returnto = optional_param('returnto', null, PARAM_ALPHA);  // Code determining 
 $cancelemailchange = optional_param('cancelemailchange', 0, PARAM_INT);   // Course id (defaults to Site).
 
 $PAGE->set_url('/user/edit.php', array('course' => $course, 'id' => $userid));
-
 if (!$course = $DB->get_record('course', array('id' => $course))) {
     throw new \moodle_exception('invalidcourseid');
 }
@@ -65,7 +64,7 @@ if (!$user = $DB->get_record('user', array('id' => $userid))) {
 if (isguestuser($user)) {
     throw new \moodle_exception('guestnoeditprofile');
 }
-
+die;
 // User interests separated by commas.
 $user->interests = core_tag_tag::get_item_tags_array('core', 'user', $user->id);
 
