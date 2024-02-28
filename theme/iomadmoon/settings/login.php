@@ -53,6 +53,13 @@ $default = 0;
 $setting = new admin_setting_configcheckbox($name, $title, $description, $default);
 $page->add($setting);
 
+$name = 'theme_iomadmoon/forcecustomloginlogo';
+$title = get_string('forcecustomloginlogo', 'theme_iomadmoon');
+$description = get_string('forcecustomloginlogo_desc', 'theme_iomadmoon');
+$default = 0;
+$setting = new admin_setting_configcheckbox($name, $title, $description, $default);
+$page->add($setting);
+
 $name = 'theme_iomadmoon/customloginlogo';
 $title = get_string('customloginlogo', 'theme_iomadmoon');
 $description = get_string('customloginlogo_desc', 'theme_iomadmoon');

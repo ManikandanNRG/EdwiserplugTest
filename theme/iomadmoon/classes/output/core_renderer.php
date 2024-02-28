@@ -2185,6 +2185,10 @@ class core_renderer extends \core_renderer {
             $context->loginidprovtop = $this->page->theme->settings->loginidprovtop;
         }
 
+        if (isset($this->page->theme->settings->forcecustomloginlogo)) {
+            $context->forcecustomloginlogo = $this->page->theme->settings->forcecustomloginlogo;
+        }
+
         if (isset($this->page->theme->settings->stringca)) {
             $context->stringca = format_text(($this->page->theme->settings->stringca),
                 FORMAT_HTML,
@@ -2597,27 +2601,17 @@ class core_renderer extends \core_renderer {
 
         // IOMAD.
         if (!empty($SESSION->currenteditingcompany)) {
-            $companyid = $SESSION->currenteditingcompany;
-            if ($companyrec = $DB->get_record('company', array('id' => $companyid))) {
-                $context = \context_system::instance();
-                $fs = get_file_storage();
-                $files = $fs->get_area_files($context->id, 'theme_iomadmoon', 'companylogo', $companyid);
-                if ($files) {
-                    foreach ($files as $file) {
-                        $filename = $file->get_filename();
-                        $filepath = ((int) $maxwidth . 'x' . (int) $maxheight) . '/';
-                        if ($filename != '.') {
-                            return moodle_url::make_pluginfile_url(
-                                context_system::instance()->id,
-                                'theme_iomadmoon',
-                                'companylogo',
-                                $filepath,
-                                $companyid,
-                                "/$filename"
-                            );
-                        }
-                    }
-                }
+            $logo = get_config('core_admin', 'logo'.$SESSION->currenteditingcompany);
+            if (!empty($logo)) {
+                // 200px high is the default image size which should be displayed at 100px in the page to account for retina displays.
+                // It's not worth the overhead of detecting and serving 2 different images based on the device.
+
+                // Hide the requested size in the file path.
+                $filepath = ((int) $maxwidth . 'x' . (int) $maxheight) . '/';
+
+                // Use $CFG->themerev to prevent browser caching when the file changes.
+                return moodle_url::make_pluginfile_url(context_system::instance()->id, 'core_admin', 'logo'.$SESSION->currenteditingcompany, $filepath,
+                    theme_get_revision(), $logo);
             }
         }
 

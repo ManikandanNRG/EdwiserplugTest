@@ -30,10 +30,10 @@ defined('MOODLE_INTERNAL') || die();
 $plugin->component = 'theme_iomadmoon';
 
 // This is the version of the plugin.
-$plugin->version = 2023040402.03;
+$plugin->version = 2023062603.01;
 
 // This is the named version.
-$plugin->release = 'v1.0.1 for 4.1+ (Build: 20221209)';
+$plugin->release = 'v1.0.2 for 4.1+ (Moodle Build: 20221209)';
 
 // This is a stable release.
 $plugin->maturity = MATURITY_STABLE;

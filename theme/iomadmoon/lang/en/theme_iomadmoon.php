@@ -38,7 +38,7 @@ $string['hgeneralnav_desc'] = 'Here you can turn off elements of the main naviga
 $string['generalsettings'] = 'General settings';
 
 $string['nobootswatch'] = 'None';
-$string['pluginname'] = 'Moon for IOMAD (1.0.1)';
+$string['pluginname'] = 'Moon for IOMAD (1.0.2)';
 $string['privacy:metadata'] = 'The Moon theme does not store any personal data about any user.';
 $string['rawscss'] = 'Raw SCSS';
 $string['rawscss_desc'] = 'Use this field to provide SCSS or CSS code which will be injected at the end of the style sheet.';
@@ -297,6 +297,8 @@ $string['loginbg'] = 'Login Page Background';
 $string['loginbg_desc'] = '';
 $string['loginbgcolor'] = 'Login Background Color (Image Container)';
 $string['loginbgcolor_desc'] = '';
+$string['forcecustomloginlogo'] = 'Force Custom Logo';
+$string['forcecustomloginlogo_desc'] = 'If you wish to avoid using various logos for different companies, choose this option. Otherwise, add logo here: Site administration - Appearance - Logos';
 $string['customloginlogo'] = 'Custom Logo on the Login Page';
 $string['customloginlogo_desc'] = '<strong>Recommendation:</strong> SVG files or png files with transparent background.';
 $string['customlogindmlogo'] = 'Custom Logo on the Login Page (Dark Mode)';

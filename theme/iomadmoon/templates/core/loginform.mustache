@@ -117,7 +117,6 @@
         {{/customsignupoutside}}
     {{/cansignup}}
 
-
     {{#loginlayoutimg}}
         <div class="rui-login-wrapper">
             <div class="rui-login-top-wrapper">
@@ -129,11 +128,18 @@
                 <div class="rui-login-top">
             {{/loginlayoutimg}}
             <div>
-                {{#customloginlogo}}
-                    <a href="{{{ config.wwwroot }}}"><img src="{{customloginlogo}}" title="{{sitename}}" alt="{{sitename}}" class="rui-login-logo img-fluid" /></a>
-                {{/customloginlogo}}
+                {{#forcecustomloginlogo}}
+                    {{#customloginlogo}}
+                        <a href="{{{ config.wwwroot }}}">
+                            <h2><img src="{{customloginlogo}}" title="{{sitename}}" alt="{{sitename}}" class="rui-login-logo img-fluid" /></h2>
+                            {{#customlogindmlogo}}
+                                <h2><img src="{{customlogindmlogo}}" alt="{{sitename}}" class="rui-custom-dmlogo ml-2 img-fluid" /></h2>
+                            {{/customlogindmlogo}}
+                        </a>
+                    {{/customloginlogo}}
+                {{/forcecustomloginlogo}}
 
-                {{^customloginlogo}}
+                {{^forcecustomloginlogo}}
                     {{#logourl}}
                         <a href="{{{ config.wwwroot }}}"><img src="{{logourl}}" title="{{sitename}}" alt="{{sitename}}" class="rui-login-logo img-fluid" /></a>
                     {{/logourl}}
@@ -143,7 +149,7 @@
                             <h1 class="rui-login-logo-name">{{sitename}}</h1>
                         </a>
                     {{/logourl}}
-                {{/customloginlogo}}
+                {{/forcecustomloginlogo}}
             </div>
             {{#loginlayoutimg}}
         </div>{{/loginlayoutimg}}
@@ -178,14 +184,16 @@
         <div class="rui-loginpage-intro">
             {{^loginlogooutside}}
                 <div class="rui-loginpage-intro-logo {{#customlogindmlogo}}dark-mode-logo{{/customlogindmlogo}} ">
-                    {{#customloginlogo}}
+                    {{#forcecustomloginlogo}}
                         <a href="{{{ config.wwwroot }}}">
                             <h2><img src="{{customloginlogo}}" title="{{sitename}}" alt="{{sitename}}" class="rui-login-logo img-fluid" /></h2>
-                            {{#customlogindmlogo}}<h2><img src="{{customlogindmlogo}}" alt="{{sitename}}" class="rui-custom-dmlogo ml-2 img-fluid" /></h2>{{/customlogindmlogo}}
+                            {{#customlogindmlogo}}
+                                <h2><img src="{{customlogindmlogo}}" alt="{{sitename}}" class="rui-custom-dmlogo ml-2 img-fluid" /></h2>
+                            {{/customlogindmlogo}}
                         </a>
-                    {{/customloginlogo}}
+                    {{/forcecustomloginlogo}}
 
-                    {{^customloginlogo}}
+                    {{^forcecustomloginlogo}}
                         {{#logourl}}
                             <a href="{{{ config.wwwroot }}}">
                                 <h2><img src="{{logourl}}" title="{{sitename}}" alt="{{sitename}}" class="rui-login-logo img-fluid" /></h2>
@@ -197,7 +205,7 @@
                                 <h2>{{sitename}}</h2>
                             </a>
                         {{/logourl}}
-                    {{/customloginlogo}}
+                    {{/forcecustomloginlogo}}
                 </div>
             {{/loginlogooutside}}
 
@@ -296,7 +304,7 @@
 
         {{^loginidprovtop}}
             {{#hasidentityproviders}}
-            <hr class="hr-small" />
+                <hr class="hr-small" />
                 <div class="rui-potentialidplist mt-3 text-center">
                     <p class="small text-center">{{#str}} potentialidps, auth {{/str}}</p>
                     <div class="row no-gutters mt-1">
@@ -317,7 +325,7 @@
 
         <div class="rui-login-additional-btns">
             {{#canloginasguest}}
-            <hr class="hr-small" />
+                <hr class="hr-small" />
                 <div class="rui-canloginasguest mt-2" title="{{#str}}someallowguest{{/str}}">
                     <p class="small text-center">{{#str}}someallowguest{{/str}}</p>
                     <form action="{{loginurl}}" method="post" id="guestlogin">
@@ -333,7 +341,9 @@
         {{#cansignup}}
             {{^customsignupoutside}}
                 <div class="rui-login-createaccount my-4 text-center">
-                    {{#canloginasguest}}<hr class="hr-small" />{{/canloginasguest}}
+                    {{#canloginasguest}}
+                        <hr class="hr-small" />
+                    {{/canloginasguest}}
                     <form action="{{signupurl}}" method="get" id="signup">
                         {{#stringca}}
                             <p class="small">{{{stringca}}}</p>
@@ -436,9 +446,9 @@
         {{#autofocusform}}
             var userNameField = document.getElementById('username');
             if (userNameField.value.length == 0) {
-                userNameField.focus();
+            userNameField.focus();
             } else {
-                document.getElementById('password').focus();
+            document.getElementById('password').focus();
             }
         {{/autofocusform}}
     {{/error}}
@@ -446,10 +456,10 @@
         document.getElementById('loginerrormessage').focus();
     {{/error}}
     require(['core_form/submit'], function(Submit) {
-        Submit.init("loginbtn");
-        {{#canloginasguest}}
-            Submit.init("loginguestbtn");
-        {{/canloginasguest}}
+    Submit.init("loginbtn");
+    {{#canloginasguest}}
+        Submit.init("loginguestbtn");
+    {{/canloginasguest}}
     });
 {{/js}}
 <script>

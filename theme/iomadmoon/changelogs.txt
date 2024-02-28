@@ -1,6 +1,10 @@
 CHANGELOG
 Moon IOMAD Theme
 - - - -
+## [1.0.2] - June 26, 2023
+# Added:
+ - Login page: Force Custom Logo
+
 ## [1.0.1] - April 3, 2023
 # Added:
  - Optional Top Bar Gradient (Top bar - Top bar with gradient)
