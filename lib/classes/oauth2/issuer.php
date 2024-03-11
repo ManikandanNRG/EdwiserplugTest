@@ -127,6 +127,11 @@ class issuer extends persistent {
                 'null' => NULL_ALLOWED,
                 'default' => null,
             ),
+            'companyid' => array(
+                'type' => PARAM_INT,
+                'null' => NULL_ALLOWED,
+                'default' => 0,
+            ),
         );
     }
 
@@ -267,5 +272,12 @@ class issuer extends persistent {
      */
     public function get_display_name(): string {
         return $this->get('loginpagename') ? $this->get('loginpagename') : $this->get('name');
+    }
+    public function get_company_name(){
+        global $DB;
+        if($this->get('companyid')){
+            return $DB->get_field("company","name",array("id"=>$this->get('companyid')));
+        }
+        return '';
     }
 }

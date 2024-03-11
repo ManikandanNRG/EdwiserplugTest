@@ -53,6 +53,7 @@ class renderer extends plugin_renderer_base {
         $table = new html_table();
         $table->head  = [
             get_string('name'),
+            get_string('company','block_iomad_company_admin'),
             get_string('issuerusedforlogin', 'tool_oauth2'),
             get_string('logindisplay', 'tool_oauth2'),
             get_string('issuerusedforinternal', 'tool_oauth2'),
@@ -84,7 +85,7 @@ class renderer extends plugin_renderer_base {
             }
             $namecell = new html_table_cell($name);
             $namecell->header = true;
-
+            $companycell = new html_table_cell($issuer->get_company_name());
             // Login issuer.
             if ((int)$issuer->get('showonloginpage') == issuer::SERVICEONLY) {
                 $loginissuer = $this->pix_icon('no', get_string('notloginissuer', 'tool_oauth2'), 'tool_oauth2');
@@ -195,6 +196,7 @@ class renderer extends plugin_renderer_base {
 
             $row = new html_table_row([
                 $namecell,
+                $companycell,
                 $loginissuerstatuscell,
                 $logindisplayas,
                 $internalissuerstatuscell,

@@ -90,7 +90,11 @@ class issuer extends persistent {
         } else {
             $mform->addElement('html', $OUTPUT->page_doc_link(get_string('issuersetup', 'tool_oauth2')));
         }
-
+        global $CFG;
+        require_once($CFG->dirroot . '/local/iomad/lib/company.php');
+        $companylist = \company::get_companies_select(false);
+        $companyselectlist = ['0' => get_string('selectacompany','block_iomad_company_selector')] + $companylist;
+        $mform->addElement('select', 'companyid', get_string('company', 'block_iomad_company_admin'), $companyselectlist);
         // Name.
         $mform->addElement('text', 'name', get_string('issuername', 'tool_oauth2'));
         $mform->addRule('name', null, 'required', null, 'client');
