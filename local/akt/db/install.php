@@ -11,7 +11,7 @@ function xmldb_local_akt_install() {
         $dbman->add_field($table, $field);
     }
 
-    $authrole = $DB->get_record('role', array('id' => "companydepartmentmanager"));
+    $authrole = $DB->get_record('role', array('shortname' => "companydepartmentmanager"));
     // Reset all default authenticated users permissions.
     unassign_capability('block/iomad_approve_access:approve', $authrole->id);
     unassign_capability('block/iomad_company_admin:companymanagement_view', $authrole->id);
