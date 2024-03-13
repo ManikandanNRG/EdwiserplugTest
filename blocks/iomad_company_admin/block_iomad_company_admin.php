@@ -105,6 +105,12 @@ class block_iomad_company_admin extends block_base {
     public function get_content() {
         global $OUTPUT, $CFG, $SESSION, $USER;
 
+        $roles = get_user_roles(\context_system::instance(), $USER->id);
+        foreach ($roles as $role){
+            if($role->shortname =='companydepartmentmanager') {
+                return;
+            }
+        }
         // Deal with Access approval notifications.
         require_once($CFG->dirroot . '/blocks/iomad_approve_access/lib.php');
         if (iomad_approve_access::has_users() && empty($SESSION->approveaccesswarningshown)) {

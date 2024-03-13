@@ -335,7 +335,7 @@ class renderer extends plugin_renderer_base {
 
         // Add it to the form.
         if (empty($before)) {
-            $mform->addElement('html', "<h4>" . get_string('department', 'block_iomad_company_admin') . "</h4>");
+            $mform->addElement('html', "<h4 class='department_heading_label'>" . get_string('department', 'block_iomad_company_admin') . "</h4>");
             $mform->addElement('html', $treehtml);
         } else {
             $mform->insertElementBefore($mform->addElement('html', "<h4>" . get_string('department', 'block_iomad_company_admin') . "</h4>"), $before);

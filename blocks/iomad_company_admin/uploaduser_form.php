@@ -62,7 +62,7 @@ class admin_uploaduser_form1 extends company_moodleform {
                          UU_UPDATE     => get_string('uuoptype_update', 'tool_uploaduser'));
         $mform->addElement('select', 'uutype', get_string('uuoptype', 'tool_uploaduser'), $choices);
 
-        $this->add_action_buttons(false, get_string('uploadusers', 'tool_uploaduser'));
+        $this->add_action_buttons(false, get_string('uploadusers', 'block_iomad_company_admin'));
     }
 }
 
@@ -235,6 +235,9 @@ class admin_uploaduser_form2 extends company_moodleform {
         $mform->setExpanded('advanced');
         $output->display_tree_selector_form($company, $mform, 0, '', false, false);
 
+        if (!iomad::has_capability('block/iomad_company_admin:assign_company_manager', \context_system::instance())) {
+            $mform->addElement('html','<style>fieldset#id_advanced .dep_tree, .department_heading_label, #fitem_manualcourseselector, #fitem_id_uubulk{display:none}</style>');
+        }
         // Do we have manual enrolment courses?
         if ($companymanualcourses) {
 
@@ -357,9 +360,14 @@ class admin_uploaduser_form2 extends company_moodleform {
             if (!in_array('email', $columns) and empty($data['email'])) {
                 $errors['email'] = get_string('requiredtemplate', 'tool_uploaduser');
             }
+            
+    
+        }
+        if(empty($data['licenseid']) && ($optype == UU_ADDNEW || $optype == UU_ADDINC) && !iomad::has_capability('block/iomad_company_admin:company_view_all', \context_system::instance())){
+            $errors['licenseid'] = get_string('requiredlicense', 'block_iomad_company_admin');
         }
         //$errors['licenseid'] = 'Not enough test';
-
+      
         if (!empty($data['licenseid'])) {
             $license = $DB->get_record('companylicense', array('id' => $data['licenseid']));
 
@@ -370,6 +378,10 @@ class admin_uploaduser_form2 extends company_moodleform {
                                                                       JOIN {course} c ON (clc.courseid = c.id
                                                                       AND clc.licenseid = :licenseid)",
                                                                       array('licenseid' => $license->id));
+            }
+            if(empty( $data['licensecourses']) && $optype != UU_UPDATE){
+                // try from post
+                $data['licensecourses'] = !is_array($_POST['licensecourses'])?[]:$_POST['licensecourses'];
             }
             if (!empty($data['licensecourses'])) {
                 if (empty($license->program)) {
@@ -391,6 +403,7 @@ class admin_uploaduser_form2 extends company_moodleform {
                 $errors['licenseid'] = 'We need ' . $requiredcount . ' license slots and have ' . $free;
             }
         }
+ 
 
         return $errors;
     }

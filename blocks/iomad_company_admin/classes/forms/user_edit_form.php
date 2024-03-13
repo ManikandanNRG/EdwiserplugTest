@@ -183,6 +183,9 @@ class user_edit_form extends \moodleform {
             $mform->setType('educator', PARAM_BOOL);
         }
 
+        if (!iomad::has_capability('block/iomad_company_admin:assign_company_manager', $systemcontext)) {
+            $mform->addElement('html','<style>fieldset#id_category_id{display:none}</style>');
+        }
         // Optional profile fields.
         $mform->addElement('header', 'profile_id', get_string('profilefields', 'mnet'));
         // Get global fields.
@@ -217,6 +220,7 @@ class user_edit_form extends \moodleform {
         // Deal with licenses.
         if (\iomad::has_capability('block/iomad_company_admin:allocate_licenses', $systemcontext)) {
             $mform->addElement('header', 'licenses', get_string('assignlicenses', 'block_iomad_company_admin'));
+            $mform->setExpanded("licenses", true);
             $foundlicenses = $DB->get_records_sql_menu("SELECT id, name FROM {companylicense}
                                                    WHERE expirydate >= :timestamp
                                                    AND companyid = :companyid
@@ -275,6 +279,9 @@ class user_edit_form extends \moodleform {
             $autooptions = array('multiple' => true,
                                  'noselectionstring' => get_string('none'));
             $mform->addElement('autocomplete', 'currentcourses', get_string('selectenrolmentcourse', 'block_iomad_company_admin'), $this->companycourses, $autooptions);
+            if (!iomad::has_capability('block/iomad_company_admin:assign_company_manager', $systemcontext)) {
+                $mform->addElement('html','<style>fieldset#id_courses{display:none}</style>');
+            }
         }
 
         // add action buttons
@@ -342,6 +349,9 @@ class user_edit_form extends \moodleform {
                                                                    'block_iomad_company_admin')));
         }
 
+        if(empty($usernew->licenseid) && !iomad::has_capability('block/iomad_company_admin:company_view_all', \context_system::instance())){
+            $errors['licenseid'] = get_string('requiredlicense', 'block_iomad_company_admin');
+        }
         //  Check numbers of licensed courses against license.
         if (!empty($usernew->licenseid)) {
             $license = $DB->get_record('companylicense', array('id' => $usernew->licenseid));

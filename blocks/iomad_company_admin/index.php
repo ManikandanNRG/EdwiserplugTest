@@ -179,7 +179,10 @@ if (iomad::has_capability('block/iomad_reports:view', $systemcontext)) {
     $panes[8] = ['category' => 'Reports', 'items' => [], 'selected' => $selected];
     $selected = false;
 }
-
+if(!empty($panes[2]) && !iomad::has_capability('block/iomad_company_admin:assign_company_manager', $systemcontext)) {
+ redirect(new moodle_url("/blocks/iomad_company_admin/manageusers.php"));
+ die;
+}
 // Build content for selected tab (from menu array).
 $menus = [];
 $plugins = get_plugins_with_function('menu', $file = 'db/iomadmenu.php', $include = true);

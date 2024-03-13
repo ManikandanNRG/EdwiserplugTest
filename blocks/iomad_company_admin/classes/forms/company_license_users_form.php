@@ -166,6 +166,10 @@ class company_license_users_form extends \moodleform {
 
         $output->display_tree_selector_form($company, $mform);
 
+        if (!iomad::has_capability('block/iomad_company_admin:company_view_all', \context_system::instance())) {
+            $mform->addElement('html','<style> .dep_tree, .department_heading_label, #fitem_id_due{display:none}</style>');
+        }
+        
         if ($this->license->expirydate > time()) {
             // Add in the courses selector.
             if (empty($this->license->program)) {
@@ -200,13 +204,13 @@ class company_license_users_form extends \moodleform {
             $mform->addElement('html', '('.($this->license->used).' / '.
             $this->license->allocation . get_string('licensetotal', 'block_iomad_company_admin').')');
         }
-
+      
         $mform->addElement('date_time_selector', 'due', get_string('senddate', 'block_iomad_company_admin'));
         $mform->addHelpButton('due', 'senddate', 'block_iomad_company_admin');
         if ($this->license->startdate > time()) {
             $mform->setDefault('due', $this->license->startdate);
         }
-
+      
         if ($this->error == 1) {
             $mform->addElement('html', "<div class='form-group row has-danger fitem'>
                                         <div class='form-inline felement' data-fieldtype='text'>
@@ -251,6 +255,7 @@ class company_license_users_form extends \moodleform {
             $mform->addElement('html', '</div>');
         }
         $mform->addElement('html', get_string('licenseusedwarning', 'block_iomad_company_admin'));
+        $mform->addElement('html', get_string('licenseusedwarning_2', 'block_iomad_company_admin'));
     }
 
     public function validation($data, $files) {

@@ -327,7 +327,12 @@ if (!empty($cancelled)) {
         // Init csv import helper.
         $cir->init();
         $linenum = 1; // Column header is first line.
-
+        $available_licence = 0;
+        if (!empty($formdata->licenseid)) {
+            $timestamp = time();
+            $licenserecord = (array) $DB->get_record('companylicense', array('id' => $formdata->licenseid));
+            $available_licence =$licenserecord['allocation']-$licenserecord['used'];
+        }
         // Init upload progress tracker.
         $upt = new uu_progress_tracker();
         $upt->init(); // Start table.
@@ -502,6 +507,15 @@ if (!empty($cancelled)) {
                         $deleteerrors++;
                         continue;
                     }
+                    if($existinguser->lastaccess >= 0 && !is_siteadmin($USER->id)){
+                        $upt->track('status', get_string("delete_last_access","block_iomad_company_admin"), 'error');
+                        $deleteerrors++;
+                        $line[] = get_string("delete_last_access","block_iomad_company_admin", $a);
+                        $errornum++;
+                        $userserrors++;
+                        $erroredusers[] = $line;
+                        continue;
+                    }
                     if (!company::check_can_manage($existinguser->id)) {
                         $upt->track('status', $strcantmanageuser, 'error');
                         $deleteerrors++;
@@ -572,6 +586,8 @@ if (!empty($cancelled)) {
                         $usersskipped++;
                         $upt->track('status', $strusernotadded, 'warning');
                         $skip = true;
+                    }else{
+                        $available_licence = $available_licence -1; 
                     }
                     break;
 
@@ -581,10 +597,16 @@ if (!empty($cancelled)) {
                         $upt->track('status', $strusernotaddederror, 'error');
                         $userserrors++;
                         continue 2;
+                    }else{
+                        $available_licence = $available_licence -1;
                     }
+                    
                     break;
 
                 case UU_ADD_UPDATE:
+                    if (!$existinguser) {
+                        $available_licence = $available_licence -1;
+                    }
                     break;
 
                 case UU_UPDATE:
@@ -596,6 +618,20 @@ if (!empty($cancelled)) {
                     break;
             }
 
+            if($available_licence < 0 && !iomad::has_capability('block/iomad_company_admin:assign_company_manager', \context_system::instance())){
+                $skip= true;
+                $usersskipped++;
+
+                $a = new \stdClass();
+                $a->used = $licenserecord['used'];
+                $a->allocated= $licenserecord['allocation'];
+                $a->cancreate = ($licenserecord['allocation'] -  $licenserecord['used']);
+                $upt->track('status', get_string("licence_error","block_iomad_company_admin", $a), 'error');
+                $line[] = get_string("licence_error","block_iomad_company_admin", $a);
+                $errornum++;
+                $userserrors++;
+                $erroredusers[] = $line;
+            }
             if ($skip) {
                 continue;
             }
@@ -1178,12 +1214,16 @@ if (!empty($cancelled)) {
 
         // Deal with any erroring users.
         if (!empty($erroredusers)) {
+            $uniq_file =$USER->id."_".time()."_erros.csv";
             echo get_string('erroredusers', 'block_iomad_company_admin');
             $erroredtable = new html_table();
             foreach ($erroredusers as $erroreduser) {
                 $erroredtable->data[] = $erroreduser;
+                file_put_contents($CFG->tempdir."/".$uniq_file, implode(",", $erroreduser).PHP_EOL,FILE_APPEND);
             }
+
             echo html_writer::table($erroredtable);
+            echo $OUTPUT->single_button(new moodle_url("/blocks/iomad_company_admin/file.php",array("file"=>$uniq_file)), "Download Error Result", "post", array("file"=>$uniq_file));
         }
 
         echo $output->box_start('boxwidthnarrow boxaligncenter generalbox', 'uploadresults');

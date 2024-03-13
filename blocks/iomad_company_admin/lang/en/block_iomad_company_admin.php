@@ -269,9 +269,9 @@ $string['departmentcreatedok'] = 'Department successfully created';
 $string['departmentimport'] = 'Import department';
 $string['departmentnameinuse'] = 'This department shortnme is already in use';
 $string['deletedepartmentcheckfull'] = 'Are you absolutely sure you want to delete department {$a} and all of it\'s sub-departments?  This will not delete the default company department';
-$string['departmentmanager'] = 'Department training manager';
-$string['departmentmanagers'] = 'Department training managers';
-$string['departmentmanagersmatching'] = 'Department training managers matching \'{$a}\'';
+$string['departmentmanager'] = 'Tenant Manager';
+$string['departmentmanagers'] = 'Tenenat Managers';
+$string['departmentmanagersmatching'] = 'Tenant managers matching \'{$a}\'';
 $string['departmentmoveuserhelp'] = 'Move the selected users to this department and remove them from all others.';
 $string['departmentnoselect'] = '<h3>***No department selected***</h3>';
 $string['departmentremoveuserhelp'] = 'Remove the selected users from this department.';
@@ -767,3 +767,18 @@ $string['companyreporter'] = 'Company report only';
 $string['xdepartmentassignments'] = '{$a}\'s departments';
 $string['xrolesassignments'] = '{$a}\'s roles';
 $string['companyloginbackground'] = 'Company Login Background Image';
+$string['manage_user_title'] = 'Manage Users';
+$string['filter_user'] = 'Filter Users';
+$string['create_user'] = "Create User";
+$string['bulk_action'] = 'Bulk Action';
+$string['uploadusers'] = 'Next';
+$string['licenseusedwarning'] = '<center>
+<ul>
+<li>Default Course License setting will be Instant Access enabled.</li>
+<li>Allocation restriction (*) should be modified from current behaviour.</li>
+<li>Restrict only the users who have never spent even 1 minute on the course - not if the license is used.</li>
+</ul>
+<br></center>';
+$string['requiredlicense'] = 'License Required!';
+$string['licence_error'] = 'Insufficient licenses – you can only create {$a->cancreate} users. Please upload within your available limits.';
+$string['delete_last_access'] = "User has accessed the system, so can not be deleted";
