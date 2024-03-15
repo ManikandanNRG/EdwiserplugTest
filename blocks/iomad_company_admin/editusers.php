@@ -90,7 +90,11 @@ $params['usertype'] = $usertype;
 $systemcontext = context_system::instance();
 
 require_login();
-
+if(iomad::has_capability('block/iomad_company_admin:editusers', $systemcontext)
+&& !iomad::has_capability('block/iomad_company_admin:assign_company_manager', $systemcontext)) {
+    redirect(new moodle_url("/blocks/iomad_company_admin/manageusers.php"));
+    die;
+   }
 if (!iomad::has_capability('block/iomad_company_admin:company_add', $systemcontext)) {
     $showall = false;
 }

@@ -240,7 +240,7 @@ class manageusers_table extends table_sql {
                         get_string('edit')
                     );
                     if (iomad::has_capability('block/iomad_company_admin:edituserpassword', $systemcontext)) {
-                        $url = new moodle_url('/blocks/iomad_company_admin/editusers.php', array(
+                        $url = new moodle_url('/blocks/iomad_company_admin/manageusers.php', array(
                             'password' => $row->id,
                             'sesskey' => sesskey(),
                         ));
@@ -262,7 +262,7 @@ class manageusers_table extends table_sql {
                     } else {
                         if (iomad::has_capability('block/iomad_company_admin:deleteuser', $systemcontext)) {
                             if(!$row->lastaccess){
-                            $url = new moodle_url('/blocks/iomad_company_admin/editusers.php', array(
+                            $url = new moodle_url('/blocks/iomad_company_admin/manageusers.php', array(
                                 'delete' => $row->id,
                                 'sesskey' => sesskey(),
                             ));
@@ -275,7 +275,7 @@ class manageusers_table extends table_sql {
                         }
                         if (iomad::has_capability('block/iomad_company_admin:suspenduser', $systemcontext)) {
                             if (!empty($row->suspended)) {
-                                $url = new moodle_url('/blocks/iomad_company_admin/editusers.php', array(
+                                $url = new moodle_url('/blocks/iomad_company_admin/manageusers.php', array(
                                     'unsuspend' => $row->id,
                                     'sesskey' => sesskey(),
                                 ));
@@ -285,7 +285,7 @@ class manageusers_table extends table_sql {
                                     get_string('unsuspend', 'block_iomad_company_admin')
                                 );
                             } else {
-                                $url = new moodle_url('/blocks/iomad_company_admin/editusers.php', array(
+                                $url = new moodle_url('/blocks/iomad_company_admin/manageusers.php', array(
                                     'suspend' => $row->id,
                                     'sesskey' => sesskey(),
                                 ));

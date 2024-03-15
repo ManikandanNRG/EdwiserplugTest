@@ -290,7 +290,7 @@ if ($confirmuser and confirm_sesskey()) {
         echo $output->heading(get_string('resetpassword', 'block_iomad_company_admin'). " " . $fullname);
         $optionsyes = array('password' => $password, 'confirm' => md5($password), 'sesskey' => sesskey());
         echo $output->confirm(get_string('resetpasswordcheckfull', 'block_iomad_company_admin', "'$fullname'"),
-                              new moodle_url('editusers.php', $optionsyes), 'editusers.php');
+                              new moodle_url('manageusers.php', $optionsyes), 'manageusers.php');
         echo $output->footer();
         die;
     } else {
@@ -307,7 +307,7 @@ if ($confirmuser and confirm_sesskey()) {
         print_error('nousers', 'error');
     }
 
-    if($USER->lastaccess >0 ){
+    if($user->lastaccess >0 ){
         print_error('nopermissions', 'error', '', 'delete a user');
     }
     if (!company::check_canedit_user($companyid, $user->id)) {
@@ -324,7 +324,7 @@ if ($confirmuser and confirm_sesskey()) {
         echo $output->heading(get_string('deleteuser', 'block_iomad_company_admin'). " " . $fullname);
         $optionsyes = array('delete' => $delete, 'confirm' => md5($delete), 'sesskey' => sesskey());
         echo $output->confirm(get_string('deletecheckfull', 'block_iomad_company_admin', "'$fullname'"),
-                              new moodle_url('editusers.php', $optionsyes), 'editusers.php');
+                              new moodle_url('manageusers.php', $optionsyes), 'manageusers.php');
         echo $output->footer();
         die;
     } else {
@@ -366,7 +366,7 @@ if ($confirmuser and confirm_sesskey()) {
         echo $output->heading(get_string('suspenduser', 'block_iomad_company_admin'). " " . $fullname);
         $optionsyes = array('suspend' => $suspend, 'confirm' => md5($suspend), 'sesskey' => sesskey());
         echo $output->confirm(get_string('suspendcheckfull', 'block_iomad_company_admin', "'$fullname'"),
-                              new moodle_url('editusers.php', $optionsyes), 'editusers.php');
+                              new moodle_url('manageusers.php', $optionsyes), 'manageusers.php');
         echo $output->footer();
         die;
     } else {
@@ -415,7 +415,7 @@ if ($confirmuser and confirm_sesskey()) {
         echo $output->heading(get_string('unsuspenduser', 'block_iomad_company_admin'). " " . $fullname);
         $optionsyes = array('unsuspend' => $unsuspend, 'confirm' => md5($unsuspend), 'sesskey' => sesskey());
         echo $output->confirm(get_string('unsuspendcheckfull', 'block_iomad_company_admin', "'$fullname'"),
-                              new moodle_url('editusers.php', $optionsyes), 'editusers.php');
+                              new moodle_url('manageusers.php', $optionsyes), 'manageusers.php');
         echo $output->footer();
         die;
     } else {

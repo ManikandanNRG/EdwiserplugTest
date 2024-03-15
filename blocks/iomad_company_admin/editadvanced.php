@@ -51,6 +51,10 @@ $linktext = get_string('company_edit_advanced_title', 'block_iomad_company_admin
 $listtext = get_string('edit_users_title', 'block_iomad_company_admin');
 // Set the url.
 $listurl = new moodle_url('/blocks/iomad_company_admin/editusers.php');
+if(iomad::has_capability('block/iomad_company_admin:editusers', $systemcontext)
+    && !iomad::has_capability('block/iomad_company_admin:assign_company_manager', $systemcontext)) {
+        $listurl = new moodle_url("/blocks/iomad_company_admin/manageusers.php");
+}
 $linkurl = $url;
 
 // Print the page header.
@@ -272,7 +276,7 @@ if ($usernew = $userform->get_data()) {
         }
     } else {
         \core\session\manager::gc(); // Remove stale sessions.
-        redirect("$CFG->wwwroot/blocks/iomad_company_admin/editusers.php");
+        redirect($listurl);
     }
     // Never reached.
 }
