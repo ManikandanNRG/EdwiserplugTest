@@ -664,6 +664,7 @@ $mform->display();
 echo html_writer::start_div("action_button");
 echo $output->single_button(new moodle_url("/blocks/iomad_company_admin/company_user_create_form.php"),get_string("create_user","block_iomad_company_admin"));
 echo $output->single_button(new moodle_url("/blocks/iomad_company_admin/uploaduser.php"),get_string("bulk_action","block_iomad_company_admin"));
+echo $output->single_button(new moodle_url("/blocks/iomad_company_admin/company_license_users_form.php"),get_string("manage_liceses","block_iomad_company_admin"));
 
 echo html_writer::end_div();
 // Actually create and display the table.

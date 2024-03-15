@@ -3860,8 +3860,14 @@ EOD;
             \iomad::has_capability('block/iomad_commerce:admin_view', $systemcontext) ||
             \iomad::has_capability('block/iomad_microlearning:view', $systemcontext) ||
             \iomad::has_capability('block/iomad_reports:view', $systemcontext)) {
+                if(iomad::has_capability('block/iomad_company_admin:usermanagement_view', $systemcontext)  && !iomad::has_capability('block/iomad_company_admin:companymanagement_view', $systemcontext)){
+                    $iomadlink = "-" . get_string('manage_user_title', 'block_iomad_company_admin') . "|" .
+                    '/blocks/iomad_company_admin/manageusers.php' . "\n\r";
+       
+                }else{
             $iomadlink = "-" . get_string('dashboard', 'block_iomad_company_admin') . "|" .
                          '/blocks/iomad_company_admin/index.php' . "\n\r";
+                }
         } else {
             $iomadlink = "";
         }

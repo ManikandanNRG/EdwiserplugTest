@@ -255,7 +255,7 @@ class company_license_users_form extends \moodleform {
             $mform->addElement('html', '</div>');
         }
         $mform->addElement('html', get_string('licenseusedwarning', 'block_iomad_company_admin'));
-        $mform->addElement('html', get_string('licenseusedwarning_2', 'block_iomad_company_admin'));
+        //$mform->addElement('html', get_string('licenseusedwarning_2', 'block_iomad_company_admin'));
     }
 
     public function validation($data, $files) {
