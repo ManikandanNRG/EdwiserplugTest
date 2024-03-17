@@ -12,6 +12,8 @@ function xmldb_local_akt_install() {
     }
 
     $authrole = $DB->get_record('role', array('shortname' => "companydepartmentmanager"));
+    
+    assign_capability('block/iomad_company_admin:edit_departments', CAP_ALLOW, $authrole->id , \context_system::instance()->id);
     // Reset all default authenticated users permissions.
     unassign_capability('block/iomad_approve_access:approve', $authrole->id);
     unassign_capability('block/iomad_company_admin:companymanagement_view', $authrole->id);
