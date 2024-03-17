@@ -410,8 +410,21 @@ class company_license_users_form extends \moodleform {
                     } else {
                         $canremove = true;
                         foreach ($licensestounassign as $unassignid) {
-                            if ($DB->get_record('companylicense_users' ,array('id' => $unassignid, 'isusing' => 1))) {
-                                $canremove = false;
+                            if ($usedl = $DB->get_record('companylicense_users' ,array('id' => $unassignid, 'isusing' => 1))) {
+                                // another condition
+                                $timespent = false;
+                                if($usedl->licensecourseid) {
+                                    $timespent = $DB->get_field_sql("select sum(timespent) timespent from {} where userid =? and course <> 1", array($usedl->userid));
+                                    if($timespent && $timespent <= 60){
+                                        $timespent = false;
+                                    }
+                                }
+                                if(!$timespent){
+                                    $canremove = true;
+                                }else{
+                                    $canremove = false;
+                                }
+                                
                             }
                         }
                     }
@@ -423,17 +436,23 @@ class company_license_users_form extends \moodleform {
                 if (!empty($licensestounassign)) {
                     foreach ($licensestounassign as $unassignid) {
                         $licensedata = $DB->get_record('companylicense_users' ,array('id' => $unassignid), '*', MUST_EXIST);
-
+                        $timespent = false;
+                        if($licensedata->licensecourseid) {
+                            $timespent = $DB->get_field_sql("select sum(timespent) timespent from {edwreports_activity_log} where userid =? and course=?", array($licensedata->userid, $licensedata->licensecourseid));
+                            if($timespent && $timespent <= 60){
+                                $timespent = false;
+                            }
+                        }
                         // Check the userid is valid.
                         if (!\company::check_valid_user($this->selectedcompany, $licensedata->userid, $this->departmentid)) {
                             print_error('invaliduserdepartment', 'block_iomad_company_management');
                         }
 
-                        if (!$licensedata->isusing || $this->license->type == 1 || $this->license->type == 3) {
+                        if (!$timespent || !$licensedata->isusing || $this->license->type == 1 || $this->license->type == 3) {
                             $DB->delete_records('companylicense_users', array('id' => $unassignid));
 
                             // Remove the report data if license hasn't been used.
-                            if (!$licensedata->isusing) {
+                            if (!$licensedata->isusing || !$timespent) {
                                 $DB->delete_records('local_iomad_track', array('userid' => $licensedata->userid,
                                                                                'licenseid' => $licensedata->id,
                                                                                'courseid' => $licensedata->licensecourseid,
