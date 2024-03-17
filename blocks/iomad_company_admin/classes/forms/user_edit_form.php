@@ -236,7 +236,7 @@ class user_edit_form extends \moodleform {
                 $mform->addElement('html', "<div class='fitem'><div class='fitemtitle'>" .
                                             get_string('selectlicensecourse', 'block_iomad_company_admin') .
                                             "</div><div class='felement'>");
-                $mform->addElement('select', 'licenseid', get_string('select_license', 'block_iomad_company_admin'), $licenses, array('id' => 'licenseidselector'));
+                $mform->addElement('select', 'licenseid', get_string('select_license', 'block_iomad_company_admin'), $licenses, array('id' => 'licenseidselector', 'onchange' => 'this.form.sumbit()'));
                 $mylicenseid = $this->licenseid;
                 if (empty($this->licenseid)) {
                     $mform->addElement('html', '<div id="licensedetails"></div>');
@@ -261,7 +261,7 @@ class user_edit_form extends \moodleform {
                 }
             }
 
-            $mform->addElement('html', '<div id="licensecoursescontainer" class="invisible">');
+            $mform->addElement('html', '<div id="licensecoursescontainer" style="display:none;">');
             $licensecourseselect = $mform->addElement('select', 'licensecourses',
                                                       get_string('select_license_courses', 'block_iomad_company_admin'),
                                                       $licensecourses, array('id' => 'licensecourseselector'));
@@ -363,9 +363,7 @@ class user_edit_form extends \moodleform {
                                                                        JOIN {course} c ON (clc.courseid = c.id
                                                                        AND clc.licenseid = :licenseid)",
                                                                        array('licenseid' => $license->id));
-            }
-
-            if (!empty($usernew->licensecourses)) {
+            }elseif (!empty($usernew->licensecourses)) {
                 if ($license = $DB->get_record('companylicense', array('id' => $usernew->licenseid))) {
                     if (count($usernew->licensecourses) + $license->used > $license->allocation) {
                         $errors['licensecourses'] = get_string('triedtoallocatetoomanylicenses', 'block_iomad_company_admin');
@@ -373,7 +371,11 @@ class user_edit_form extends \moodleform {
                 } else {
                     $errors['licenseid'] = get_string('invalidlicense', 'block_iomad_company_admin');
                 }
+            }else{
+            if (!iomad::has_capability('block/iomad_company_admin:assign_company_manager', \context_system::instance())) {
+                $errors['licenseid'] = get_string('requiredlicense', 'block_iomad_company_admin');
             }
+          }
         }
         return $errors;
     }
