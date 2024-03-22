@@ -82,12 +82,16 @@ class user_roles_editable extends \core\output\inplace_editable {
         // Remember these for the display value.
         $this->assignableroles = $assignableroles;
         $this->context = $context;
-
+        if(!array_key_exists($value, $assignableroles)){
+            $value = 0;
+        
+        }
         parent::__construct('block_iomad_company_admin', 'user_roles', $itemid, $editable, $value, $value);
 
         $this->edithint = get_string('xrolesassignments', 'block_iomad_company_admin', fullname($user));
         $this->editlabel = get_string('xrolesassignments', 'block_iomad_company_admin', fullname($user));
-
+       
+        // role release ussye
         $this->set_type_select($assignableroles);
     }
 

@@ -28,7 +28,8 @@ defined('MOODLE_INTERNAL') || die();
  *
  * @param object course record
  */
-function local_iomad_pre_course_delete($course) {
+function local_iomad_pre_course_delete($course)
+{
     global $DB, $OUTPUT;
 
     // Clear everything from the iomad_courses table.
@@ -62,4 +63,43 @@ function local_iomad_pre_course_delete($course) {
     echo $OUTPUT->notification(get_string('removelicenses', 'local_iomad'), 'notifysuccess');
 
     return true;
+}
+
+function local_iomad_pre_user_delete($user)
+{
+    global $DB;
+    // free the license in case user is being deleted
+    if ($user->lastaccess > 0) {
+        return;
+        // nothing to do if user has last access
+    }
+    if ($licensedatas = $DB->get_records('companylicense_users', array('userid' => $user->id, 'isusing' => 1))) {
+        foreach ($licensedatas as $licensedata) {
+            if (!$licensedata->isusing) {
+                $DB->delete_records('local_iomad_track', array(
+                    'userid' => $licensedata->userid,
+                    'licenseid' => $licensedata->licenseid ,
+                    'courseid' => $licensedata->licensecourseid,
+                    'timeenrolled' => null
+                ));
+            }
+            $DB->delete_records('companylicense_users', array('id' => $licensedata->id));
+            // Create an event.
+            $eventother = array(
+                'licenseid' => $licensedata->licenseid ,
+                'duedate' => 0
+            );
+            
+            
+            $event = \block_iomad_company_admin\event\user_license_unassigned::create(array(
+                'context' => \context_course::instance($licensedata->licensecourseid),
+                'objectid' => $licensedata->id ,
+                'courseid' => $licensedata->licensecourseid,
+                'userid' => $licensedata->userid,
+                'other' => $eventother
+            ));
+            company::user_license_unassigned($event);
+            $event->trigger();
+        }
+    }
 }
