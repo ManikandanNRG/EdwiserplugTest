@@ -1518,7 +1518,8 @@ class current_license_user_selector extends company_user_selector_base {
             }
             $availableusers = $userlist;
         }
-
+        $us = [];
+        $star = [];
         foreach ($availableusers as $id => $rawuser) {
             if (empty($this->program) && (in_array(0, $this->selectedcourses) || count($this->selectedcourses) > 1)) {
                 $availableusers[$id]->email .= ' (' . $rawuser->fullname . ')';
@@ -1527,7 +1528,24 @@ class current_license_user_selector extends company_user_selector_base {
             if (!empty($rawuser->isusing) && ($this->license->type == 0 || $this->license->type == 2)) {
                 $availableusers[$id]->firstname = ' *' . $availableusers[$id]->firstname;
             }
+            $us[] =$rawuser->id;
         }
+        if(!empty($us)){
+            $us = implode(",", $us);
+            $ts = $DB->get_records_sql("select sum(e.timespent) timespent, e.userid from {edwreports_activity_log} e  where e.userid in($us) and e.course <> 1 group by e.userid");
+            foreach ($ts as $t){
+                    if($t->timespent >= 60){
+                        $star[$t->userid] =$t->userid;
+                    }
+                }
+            foreach ($availableusers as $k=>$a){
+                if(!array_key_exists($a->id, $star) &&  substr($a->firstname, 0,2)==' *'){
+                    $availableusers[$k]->firstname = substr($a->firstname, 2);
+                }
+               
+            }    
+        }
+        
 
         if ($search) {
             $groupname = get_string('licenseusersmatching', 'block_iomad_company_admin', $search);

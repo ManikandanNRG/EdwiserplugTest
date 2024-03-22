@@ -414,7 +414,7 @@ class company_license_users_form extends \moodleform {
                                 // another condition
                                 $timespent = false;
                                 if($usedl->licensecourseid) {
-                                    $timespent = $DB->get_field_sql("select sum(timespent) timespent from {} where userid =? and course <> 1", array($usedl->userid));
+                                    $timespent = $DB->get_field_sql("select sum(timespent) timespent from {edwreports_activity_log} where userid =? and course <> 1", array($usedl->userid));
                                     if($timespent && $timespent <= 60){
                                         $timespent = false;
                                     }
