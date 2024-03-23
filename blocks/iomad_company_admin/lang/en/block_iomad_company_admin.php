@@ -783,3 +783,4 @@ $string['requiredlicense'] = 'License Required!';
 $string['licence_error'] = 'Insufficient licenses – you can only create {$a->cancreate} users. Please upload within your available limits.';
 $string['delete_last_access'] = "User has accessed the system, so can not be deleted";
 $string['manage_liceses'] = 'Manage Licenses';
+$string['userdeletedwitherror'] = 'Except following users ( {$a}), rest are deleted successfully.';

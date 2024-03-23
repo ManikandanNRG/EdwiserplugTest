@@ -37,20 +37,34 @@ use \context_user;
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir.'/tablelib.php');
+require_once($CFG->libdir . '/tablelib.php');
 
-class manageusers_table extends table_sql {
+class manageusers_table extends table_sql
+{
 
     protected $departments;
     protected $assignabledepartments;
     protected $usertypes;
 
+    public function col_selection($row)
+    {
+        global $USER;
+        if (!empty($USER->editing) && $row->id != $USER->id) {
+
+            if (iomad::has_capability('block/iomad_company_admin:deleteuser', \context_system::instance())) {
+                if (!$row->lastaccess) {
+                    return '<input type="checkbox" name=ccselecteduser[' . $row->id . '] class="ccselecteduser" value="' . $row->id . '"/>';
+                }
+            }
+        }
+    }
     /**
      * Generate the display of the user's| fullname
      * @param object $user the table row being output.
      * @return string HTML content to go inside the td.
      */
-    public function col_fullname($row) {
+    public function col_fullname($row)
+    {
         $name = fullname($row, has_capability('moodle/site:viewfullnames', $this->get_context()));
 
         // Deal with suspended users.
@@ -73,11 +87,12 @@ class manageusers_table extends table_sql {
      * @param object $user the table row being output.
      * @return string HTML content to go inside the td.
      */
-    public function col_department($row) {
+    public function col_department($row)
+    {
         global $DB, $USER, $company, $OUTPUT;
 
         $userdepartments = array_keys($DB->get_records('company_users', ['companyid' => $company->id, 'userid' => $row->id], '', 'departmentid'));
-        if ( 1) {
+        if (1) {
             $count = count($userdepartments);
             $current = 1;
             $returnstr = "";
@@ -86,7 +101,7 @@ class manageusers_table extends table_sql {
             }
 
             $first = true;
-            foreach($userdepartments as $department) {
+            foreach ($userdepartments as $department) {
                 //$returnstr .= format_string($department->name);
                 $returnstr .= format_string($this->departmentsmenu[$department]);
 
@@ -101,14 +116,15 @@ class manageusers_table extends table_sql {
             }
 
             return $returnstr;
-
         } else {
-            $editable = new \block_iomad_company_admin\output\user_departments_editable($company,
-                                                          \context_system::instance(),
-                                                          $row,
-                                                          $userdepartments,
-                                                          $this->departments,
-                                                          $this->assignabledepartments);
+            $editable = new \block_iomad_company_admin\output\user_departments_editable(
+                $company,
+                \context_system::instance(),
+                $row,
+                $userdepartments,
+                $this->departments,
+                $this->assignabledepartments
+            );
 
             return $OUTPUT->render_from_template('core/inplace_editable', $editable->export_for_template($OUTPUT));
         }
@@ -119,7 +135,8 @@ class manageusers_table extends table_sql {
      * @param object $user the table row being output.
      * @return string HTML content to go inside the td.
      */
-    public function col_managertype($row) {
+    public function col_managertype($row)
+    {
         global $CFG, $DB, $USER, $company, $OUTPUT;
 
         $returnstr = "";
@@ -133,14 +150,16 @@ class manageusers_table extends table_sql {
             if (!empty($row->educator) && empty($CFG->iomad_autoenrol_managers)) {
                 $returnstr .= ",<br>" . $this->usertypes[3];
             }
-    
+
             return $returnstr;
         } else {
             // Can't be a company manager if you are in more than one department or the department you are in is not the top level department.
             $userdepartments = array_keys($DB->get_records('company_users', ['companyid' => $company->id, 'userid' => $row->id], '', 'departmentid'));
             $usertypeselect = $this->usertypeselect;
-            if (count($userdepartments) > 1 ||
-                $userdepartments[0] != $this->parentlevel->id) {
+            if (
+                count($userdepartments) > 1 ||
+                $userdepartments[0] != $this->parentlevel->id
+            ) {
                 unset($usertypeselect[10]);
                 unset($usertypeselect[11]);
             }
@@ -157,16 +176,16 @@ class manageusers_table extends table_sql {
                 $currentvalue = 0;
             }
 
-            $editable = new \block_iomad_company_admin\output\user_roles_editable($company,
-                                                          \context_system::instance(),
-                                                          $row,
-                                                          $currentvalue,
-                                                          $usertypeselect);
+            $editable = new \block_iomad_company_admin\output\user_roles_editable(
+                $company,
+                \context_system::instance(),
+                $row,
+                $currentvalue,
+                $usertypeselect
+            );
 
             return $OUTPUT->render_from_template('core/inplace_editable', $editable->export_for_template($OUTPUT));
         }
-
-
     }
 
     /**
@@ -174,7 +193,8 @@ class manageusers_table extends table_sql {
      * @param object $user the table row being output.
      * @return string HTML content to go inside the td.
      */
-    public function col_email($row) {
+    public function col_email($row)
+    {
 
         return $row->email;
     }
@@ -185,7 +205,8 @@ class manageusers_table extends table_sql {
      * @param object $user the table row being output.
      * @return string HTML content to go inside the td.
      */
-    public function col_lastaccess($row) {
+    public function col_lastaccess($row)
+    {
         global $CFG;
 
         if (!empty($row->lastaccess)) {
@@ -200,7 +221,8 @@ class manageusers_table extends table_sql {
      * @param object $user the table row being output.
      * @return string HTML content to go inside the td.
      */
-    public function col_company($row) {
+    public function col_company($row)
+    {
 
         return format_string($row->companyname);
     }
@@ -210,7 +232,8 @@ class manageusers_table extends table_sql {
      * @param object $user the table row being output.
      * @return string HTML content to go inside the td.
      */
-    public function col_actions($row) {
+    public function col_actions($row)
+    {
         global $USER, $output, $params, $systemcontext, $DB, $companyid;
 
         // User actions
@@ -222,14 +245,19 @@ class manageusers_table extends table_sql {
 
         if (!empty($USER->editing)) {
             if ((iomad::has_capability('block/iomad_company_admin:editusers', $systemcontext)
-                 or iomad::has_capability('block/iomad_company_admin:editallusers', $systemcontext))
-                 or $row->id == $USER->id and !is_mnet_remote_user($row)) {
-                if ($row->id != $USER->id &&
-                    $DB->get_records_select('company_users',
-                                            'companyid =:company AND managertype IN (1,2) AND userid = :userid',
-                                            array('company' => $row->companyid, 'userid' => $row->id))
-                    && !iomad::has_capability('block/iomad_company_admin:editmanagers', $systemcontext)) {
-                   // This manager can't edit manager users.
+                    or iomad::has_capability('block/iomad_company_admin:editallusers', $systemcontext))
+                or $row->id == $USER->id and !is_mnet_remote_user($row)
+            ) {
+                if (
+                    $row->id != $USER->id &&
+                    $DB->get_records_select(
+                        'company_users',
+                        'companyid =:company AND managertype IN (1,2) AND userid = :userid',
+                        array('company' => $row->companyid, 'userid' => $row->id)
+                    )
+                    && !iomad::has_capability('block/iomad_company_admin:editmanagers', $systemcontext)
+                ) {
+                    // This manager can't edit manager users.
                 } else {
                     $url = new moodle_url('/blocks/iomad_company_admin/editadvanced.php', array(
                         'id' => $row->id,
@@ -255,23 +283,25 @@ class manageusers_table extends table_sql {
 
             if ($row->id != $USER->id) {
                 if ((iomad::has_capability('block/iomad_company_admin:editusers', $systemcontext)
-                     or iomad::has_capability('block/iomad_company_admin:editallusers', $systemcontext))) {
-                    if ($DB->get_records_select('company_users', 'companyid =:company AND managertype != 0 AND userid = :userid', array('company' => $companyid, 'userid' => $row->id))
-                    && !iomad::has_capability('block/iomad_company_admin:editmanagers', $systemcontext)) {
+                    or iomad::has_capability('block/iomad_company_admin:editallusers', $systemcontext))) {
+                    if (
+                        $DB->get_records_select('company_users', 'companyid =:company AND managertype != 0 AND userid = :userid', array('company' => $companyid, 'userid' => $row->id))
+                        && !iomad::has_capability('block/iomad_company_admin:editmanagers', $systemcontext)
+                    ) {
                         // Do nothing.
                     } else {
                         if (iomad::has_capability('block/iomad_company_admin:deleteuser', $systemcontext)) {
-                            if(!$row->lastaccess){
-                            $url = new moodle_url('/blocks/iomad_company_admin/manageusers.php', array(
-                                'delete' => $row->id,
-                                'sesskey' => sesskey(),
-                            ));
-                            $actions['delete'] = new action_menu_link_secondary(
-                                $url,
-                                null,
-                                get_string('delete')
-                            );
-                         }
+                            if (!$row->lastaccess) {
+                                $url = new moodle_url('/blocks/iomad_company_admin/manageusers.php', array(
+                                    'delete' => $row->id,
+                                    'sesskey' => sesskey(),
+                                ));
+                                $actions['delete'] = new action_menu_link_secondary(
+                                    $url,
+                                    null,
+                                    get_string('delete')
+                                );
+                            }
                         }
                         if (iomad::has_capability('block/iomad_company_admin:suspenduser', $systemcontext)) {
                             if (!empty($row->suspended)) {
@@ -302,9 +332,10 @@ class manageusers_table extends table_sql {
         }
 
         if ((iomad::has_capability('block/iomad_company_admin:company_course_users', $systemcontext)
-             or iomad::has_capability('block/iomad_company_admin:editallusers', $systemcontext))
-             and ($row->id == $USER->id or !is_siteadmin($row)
-             and !is_mnet_remote_user($row))) {
+                or iomad::has_capability('block/iomad_company_admin:editallusers', $systemcontext))
+            and ($row->id == $USER->id or !is_siteadmin($row)
+                and !is_mnet_remote_user($row))
+        ) {
             $url = new moodle_url('/blocks/iomad_company_admin/company_users_course_form.php', array(
                 'userid' => $row->id,
             ));
@@ -316,9 +347,10 @@ class manageusers_table extends table_sql {
         }
 
         if ((iomad::has_capability('block/iomad_company_admin:company_license_users', $systemcontext)
-             or iomad::has_capability('block/iomad_company_admin:editallusers', $systemcontext))
-             and ($row->id == $USER->id or !is_siteadmin($row))
-             and !is_mnet_remote_user($row)) {
+                or iomad::has_capability('block/iomad_company_admin:editallusers', $systemcontext))
+            and ($row->id == $USER->id or !is_siteadmin($row))
+            and !is_mnet_remote_user($row)
+        ) {
             $url = new moodle_url('/blocks/iomad_company_admin/company_users_licenses_form.php', array(
                 'userid' => $row->id,
             ));
@@ -350,13 +382,13 @@ class manageusers_table extends table_sql {
         }
 
         return $output->render($menu);
-
     }
 
     /**
      * This function is not part of the public api.
      */
-    function print_nothing_to_display() {
+    function print_nothing_to_display()
+    {
         global $OUTPUT, $CFG;
 
         // Render the dynamic table header.
@@ -373,8 +405,10 @@ class manageusers_table extends table_sql {
         echo $this->get_dynamic_table_html_end();
 
         // Add the button to add a user.
-        echo $OUTPUT->single_button(new moodle_url($CFG->wwwroot . '/blocks/iomad_company_admin/company_user_create_form.php'),
-                                    get_string('createuser', 'block_iomad_company_admin'));
+        echo $OUTPUT->single_button(
+            new moodle_url($CFG->wwwroot . '/blocks/iomad_company_admin/company_user_create_form.php'),
+            get_string('createuser', 'block_iomad_company_admin')
+        );
     }
 
     /**
@@ -382,7 +416,8 @@ class manageusers_table extends table_sql {
      * @param string $uniqueid all tables have to have a unique id, this is used
      *      as a key when storing table properties like sort order in the session.
      */
-    function __construct($uniqueid) {
+    function __construct($uniqueid)
+    {
         global $DB, $companyid, $company, $USER, $CFG;
 
         $context = context_system::instance();
@@ -400,12 +435,13 @@ class manageusers_table extends table_sql {
 
         $this->companyid = $companyid;
 
-        $this->usertypes = ['0' => get_string('user', 'block_iomad_company_admin'),
-                            '1' => get_string('companymanager', 'block_iomad_company_admin'),
-                            '2' => get_string('departmentmanager', 'block_iomad_company_admin'),
-                            '3' => get_string('educator', 'block_iomad_company_admin'),
-                            '4' => get_string('companyreporter', 'block_iomad_company_admin'),
-                          ];
+        $this->usertypes = [
+            '0' => get_string('user', 'block_iomad_company_admin'),
+            '1' => get_string('companymanager', 'block_iomad_company_admin'),
+            '2' => get_string('departmentmanager', 'block_iomad_company_admin'),
+            '3' => get_string('educator', 'block_iomad_company_admin'),
+            '4' => get_string('companyreporter', 'block_iomad_company_admin'),
+        ];
 
         $this->departments = $DB->get_records('department', ['company' => $companyid], 'name', 'id,name');
 
@@ -445,7 +481,7 @@ class manageusers_table extends table_sql {
             }
             if (iomad::has_capability('block/iomad_company_admin:assign_department_manager', $context)) {
                 $this->usertypeselect[20] = get_string('departmentmanager', 'block_iomad_company_admin');
-                $this->usertypeselect[21] = get_string('departmentmanager', 'block_iomad_company_admin') . ' + ' . get_string('educator', 'block_iomad_company_admin'); 
+                $this->usertypeselect[21] = get_string('departmentmanager', 'block_iomad_company_admin') . ' + ' . get_string('educator', 'block_iomad_company_admin');
             }
             if (iomad::has_capability('block/iomad_company_admin:assign_company_reporter', $context)) {
                 $this->usertypeselect[40] = get_string('companyreporter', 'block_iomad_company_admin');
