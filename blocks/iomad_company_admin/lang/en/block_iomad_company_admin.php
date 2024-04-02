@@ -773,12 +773,10 @@ $string['create_user'] = "Create User";
 $string['bulk_action'] = 'Bulk Action';
 $string['uploadusers'] = 'Next';
 $string['licenseusedwarning'] = '<center>
-<ul>
-<li>Default Course License setting will be Instant Access enabled.</li>
-<li>Allocation restriction (*) should be modified from current behaviour.</li>
-<li>Restrict only the users who have never spent even 1 minute on the course - not if the license is used.</li>
-</ul>
-<br></center>';
+<ul><li>
+Users who are marked with an asterisk are already using their license allocation for a course and so cannot have their license taken away from them.
+</li></ul>
+</center>';
 $string['requiredlicense'] = 'License Required!';
 $string['licence_error'] = 'Insufficient licenses – you can only create {$a->cancreate} users. Please upload within your available limits.';
 $string['delete_last_access'] = "User has accessed the system, so can not be deleted";
