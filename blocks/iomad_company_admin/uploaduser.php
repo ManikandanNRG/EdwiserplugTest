@@ -507,7 +507,7 @@ if (!empty($cancelled)) {
                         $deleteerrors++;
                         continue;
                     }
-                    if($existinguser->lastaccess >= 0 && !is_siteadmin($USER->id)){
+                    if($existinguser->lastaccess > 0 && !is_siteadmin($USER->id)){
                         $upt->track('status', get_string("delete_last_access","block_iomad_company_admin"), 'error');
                         $deleteerrors++;
                         $line[] = get_string("delete_last_access","block_iomad_company_admin", $a);
