@@ -237,6 +237,9 @@ class user_edit_form extends \moodleform {
                                             get_string('selectlicensecourse', 'block_iomad_company_admin') .
                                             "</div><div class='felement'>");
                 $mform->addElement('select', 'licenseid', get_string('select_license', 'block_iomad_company_admin'), $licenses, array('id' => 'licenseidselector', 'onchange' => 'this.form.sumbit()'));
+                if (!iomad::has_capability('block/iomad_company_admin:assign_company_manager', $systemcontext)) {
+                    $mform->addRule( 'licenseid',  $strrequired, 'required', null, 'client');
+                }
                 $mylicenseid = $this->licenseid;
                 if (empty($this->licenseid)) {
                     $mform->addElement('html', '<div id="licensedetails"></div>');

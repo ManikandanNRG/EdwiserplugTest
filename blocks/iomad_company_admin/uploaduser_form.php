@@ -400,7 +400,9 @@ class admin_uploaduser_form2 extends company_moodleform {
             if ( $requiredcount > $free) {
                 // check how many free spaces
                 // compare it to numbers of users
-                $errors['licenseid'] = 'We need ' . $requiredcount . ' license slots and have ' . $free;
+                $ca = new \stdClass();
+                $ca->cancreate = $free;
+                $errors['licenseid'] = get_string('licence_error','block_iomad_company_admin',$ca) ;
             }
         }
  

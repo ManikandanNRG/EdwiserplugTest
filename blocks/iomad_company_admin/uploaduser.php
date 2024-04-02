@@ -584,8 +584,12 @@ if (!empty($cancelled)) {
                 case UU_ADDNEW:
                     if ($existinguser) {
                         $usersskipped++;
-                        $upt->track('status', $strusernotadded, 'warning');
-                        $skip = true;
+                        $upt->track('status', $strusernotadded, 'error');
+                        $line[] = $strusernotadded;
+                        $errornum++;
+                        $userserrors++;
+                        $erroredusers[] = $line;
+                        $skip = true; ;
                     }else{
                         $available_licence = $available_licence -1; 
                     }
@@ -1217,13 +1221,15 @@ if (!empty($cancelled)) {
             $uniq_file =$USER->id."_".time()."_erros.csv";
             echo get_string('erroredusers', 'block_iomad_company_admin');
             $erroredtable = new html_table();
+            //$erroredtable->head = [get_string('firstname')get_string('firstname'),get_string('lastname'),get_string('email'),get_string('status')];
+            //file_put_contents($CFG->tempdir."/".$uniq_file, implode(",",  $erroredtable->head ).PHP_EOL,FILE_APPEND);
             foreach ($erroredusers as $erroreduser) {
                 $erroredtable->data[] = $erroreduser;
                 file_put_contents($CFG->tempdir."/".$uniq_file, implode(",", $erroreduser).PHP_EOL,FILE_APPEND);
             }
 
             echo html_writer::table($erroredtable);
-            echo $OUTPUT->single_button(new moodle_url("/blocks/iomad_company_admin/file.php",array("file"=>$uniq_file)), "Download Error Result", "post", array("file"=>$uniq_file));
+            echo $OUTPUT->single_button(new moodle_url("/blocks/iomad_company_admin/file.php",array("file"=>$uniq_file)), get_string('download_error_result','block_iomad_company_admin'), "post", array("file"=>$uniq_file));
         }
 
         echo $output->box_start('boxwidthnarrow boxaligncenter generalbox', 'uploadresults');

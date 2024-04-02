@@ -145,8 +145,8 @@ if (!empty($departmentid) && !company::check_valid_department($companyid, $depar
 $company = new company($companyid);
 $parentlevel = company::get_company_parentnode($company->id);
 $companydepartment = $parentlevel->id;
-$heading = $company->get("name") . ($company->get("shortname") ? "( " . $company->get("shortname") . " )" : '');
-$PAGE->set_heading($heading);
+$heading = $company->get("name") . ($company->get("shortname") ? " <span class='hd_company_shortname'>( " . $company->get("shortname") . " )</span>" : '');
+$PAGE->set_heading($heading, false);
 
 if (iomad::has_capability('block/iomad_company_admin:edit_all_departments', context_system::instance())) {
     $userhierarchylevel = $parentlevel->id;
@@ -489,13 +489,14 @@ if ($confirmuser and confirm_sesskey()) {
         print_error('nousers', 'error');
     }
     $er = [];
+    $sdr= 0 ;
     foreach ($strdel as $l=>$delete) {
         try {
             if (!$user = $DB->get_record('user', array('id' => $delete))) {
                 print_error('nousers', 'error');
             }
 
-            if ($user->lastaccess > 0 || $user->id==44) {
+            if ($user->lastaccess > 0 ) {
                 print_error('nopermissions', 'error', '', 'delete a user');
             }
             if (!company::check_canedit_user($companyid, $user->id)) {
@@ -516,6 +517,7 @@ if ($confirmuser and confirm_sesskey()) {
                 'other' => $eventother
             ));
             $event->trigger();
+            $sdr++;
             unset($strdel[$l]);
         } catch (\Exception $ex) {
             if($user){
@@ -525,7 +527,7 @@ if ($confirmuser and confirm_sesskey()) {
     }
     if(empty($strdel)){
         // all success
-        $returnmessage = get_string('userdeletedok', 'block_iomad_company_admin');
+        $returnmessage = get_string('multiuserdeletedok', 'block_iomad_company_admin', $sdr);
         redirect($returnurl, $returnmessage, null, \core\output\notification::NOTIFY_SUCCESS);
     }else{
         
@@ -664,13 +666,13 @@ if (!$showall) {
         get_string('fullname'),
         get_string('email'),
         get_string('role'),
-        get_string('department')
+     
     );
     $columns = array(
         "fullname",
         "email",
         'managertype',
-        "department"
+       
     );
 } else {
     $headers = array(
@@ -746,9 +748,15 @@ echo '<style>
 </style>';
 $mform->display();
 echo html_writer::start_div("action_button");
-echo $output->single_button(new moodle_url("/blocks/iomad_company_admin/company_user_create_form.php"), get_string("create_user", "block_iomad_company_admin"));
-echo $output->single_button(new moodle_url("/blocks/iomad_company_admin/uploaduser.php"), get_string("bulk_action", "block_iomad_company_admin"));
-echo $output->single_button(new moodle_url("/blocks/iomad_company_admin/company_license_users_form.php"), get_string("manage_liceses", "block_iomad_company_admin"));
+$b = new single_button(new moodle_url("/blocks/iomad_company_admin/company_user_create_form.php"), get_string("create_user", "block_iomad_company_admin"));
+$b->set_attribute("data-btn"," manageform_create_users");
+echo $output->render($b);
+$b = new single_button(new moodle_url("/blocks/iomad_company_admin/uploaduser.php"), get_string("bulk_action", "block_iomad_company_admin"));
+$b->set_attribute("data-btn"," manageform_bulk");
+echo $output->render($b);
+$b = new single_button(new moodle_url("/blocks/iomad_company_admin/company_license_users_form.php"), get_string("manage_liceses", "block_iomad_company_admin"));
+$b->set_attribute("data-btn"," manageform_license");
+echo $output->render($b);
 
 echo html_writer::end_div();
 // Actually create and display the table.
