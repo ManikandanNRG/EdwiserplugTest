@@ -696,7 +696,7 @@ $string['unsuspenduser'] = 'Unsuspend user';
 $string['updatedepartmentusersselection'] = 'Choose Department';
 $string['updatelicense'] = 'Update license allocation';
 $string['uploadfilecontainerror'] = 'The file contents could not be processed.';
-$string['uploadfilecontentsnovaliddata'] = 'The uploaded file is either in an invalid format or there were no user changes to process.';
+$string['uploadfilecontentsnovaliddata'] = '<div class="alert alert-warning">The uploaded file is either in an invalid format or there were no user changes to process.</div>';
 $string['uploadfromfile'] = 'Upload from file';
 $string['upload_no_company_no_courses'] = 'Courses can only be selected when a company is selected.';
 $string['upload_no_company_selected'] = 'No company selected, profile_field_company must be present in the uploaded file.';
@@ -725,7 +725,7 @@ $string['userunsuspendedok'] = 'User was successfully unsuspended';
 $string['user_upload_title'] = 'Upload users';
 $string['user'] = 'User';
 $string['usercontrols'] = 'User controls';
-$string['uupreprocessedcount'] = '{$a} user(s)';
+$string['uupreprocessedcount'] = '{$a} user(s) processed.';
 $string['validfor'] = 'Training expires after (days)';
 $string['validfor_help'] = 'This is the number of days after which the training undertaken by the user is said to no longer be valid or must be retaken. If the course does not expire, then set this to zero.  The user\'s enrolment will be removed at the time of expiry (or the number of days to warn before this, if set) if the user still has access to the course.';
 $string['invalidgrade'] = 'Invalid grade! (Must be a value between 0 and 100)';
@@ -784,3 +784,23 @@ $string['manage_liceses'] = 'Manage Licenses';
 $string['userdeletedwitherror'] = 'Except following users ( {$a}), rest are deleted successfully.';
 $string['multiuserdeletedok'] = ' {$a} user deleted successfully.';
 $string['download_error_result'] = 'Download Error Result';
+$string['invalidemail'] = 'Invalid email address found in your sheet. Please check your file and upload again.';
+$string['previewrows_help'] = ' At each step , you will be able to download the output file.';
+$string['csvloaderror'] = 'An error occurred while loading the CSV file: {$a}.</br>
+make sure to remove the [action, error] columns from the sheet and upload again
+';
+$string['msg_bulk_error_records'] = '
+<p> We did a basic check and found that, out of {$a->total} uploaded records {$a->error} record(s) have error(s).
+</p>
+<p> You can download the sheet by clicking on download button and re-upload after correction. </p>
+<p> Make sure to remove action and error column before re-upload.</p>
+';
+
+$string['msg_bulk_preview_records'] = '<p>We are showing {$a->preview} record(s) out of {$a->total} record(s).</p>
+<p> You can download the sheet with all records by clicking on download button </p>';
+$string['download_preview_result'] = 'Download Preview Result';
+$string['no_license'] = '<div class="alert alert-warning">License are required to create account, but, you do not have any active license.</div>';
+$string['summary'] = 'Summary';
+$string['process_result_warning'] = '<div class="alert alert-warning">We will only show {$a} result, however, you will get the download button, once complete procss is done.</div>';
+$string['download_result'] = 'Download output';
+$string['upload_logs'] = "Previous upload logs";

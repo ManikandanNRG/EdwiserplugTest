@@ -37,7 +37,9 @@ $uploadtype  = optional_param('uutype', 0, PARAM_INT);
 $licenseid = optional_param('licenseid', 0, PARAM_INT);
 $userdepartment = optional_param('userdepartment', 0, PARAM_INT);
 $cancelled = optional_param('cancel', null, PARAM_CLEAN);
-
+if(!is_dir($CFG->tempdir."/iomad_bulk_logs/")){
+    @mkdir($CFG->tempdir."/iomad_bulk_logs/",0777, true);
+}
 if (!empty($licenseid)) {
     $SESSION->chosenlicenseid = $licenseid;
 }
@@ -164,13 +166,14 @@ if ($proffields = $DB->get_records('user_info_field')) {
     }
     unset($proffields);
 }
+$uploaded_file_name = '';
 if (empty($iid)) {
     $mform = new admin_uploaduser_form1();
 
     if ($formdata = $mform->get_data()) {
         $iid = csv_import_reader::get_new_iid('uploaduser');
         $cir = new csv_import_reader($iid, 'uploaduser');
-
+        $uploaded_file_name = $mform->get_new_filename('userfile');
         $content = $mform->get_file_content('userfile');
         $optype = $formdata->uutype;
         $readcount = $cir->load_csv_content($content,
@@ -178,7 +181,8 @@ if (empty($iid)) {
                                             $formdata->delimiter_name,
                                             'validate_user_upload_columns');
         if (!$columns = $cir->get_columns()) {
-           print_error('cannotreadtmpfile', 'error', $returnurl);
+                print_error('csvloaderror', 'block_iomad_company_admin', $returnurl, $cir->get_error());
+                                            
         }
 
         unset($content);
@@ -215,9 +219,9 @@ if (empty($iid)) {
 
         if ($readcount === false) {
             // TODO: need more detailed error info.
-            print_error('csvloaderror', '', $returnurl);
+            print_error('csvloaderror', '', $returnurl,$cir->get_error());
         } else if ($readcount == 0) {
-            print_error('csvemptyfile', 'error', $returnurl);
+            print_error('csvemptyfile', 'error', $returnurl,$cir->get_error());
         }
         // Continue to form2.
 
@@ -244,7 +248,8 @@ $mform->set_data(array('iid' => $iid,
                        'readcount' => $readcount,
                        'uutypelabel' => $choices[$uploadtype],
                        'uutype' => $uploadtype,
-                       'companyid' => $companyid));
+                       'companyid' => $companyid,
+                    'uploaded_file_name'=>$uploaded_file_name));
 
 // If a file has been uploaded, then process it.
 if (!empty($cancelled)) {
@@ -258,7 +263,8 @@ if (!empty($cancelled)) {
             $cir->cleanup(true);
             redirect($returnurl);
         }
-
+     
+        
         // Deal with program license.
         if (!empty($formdata->licenseid)) {
             if ($DB->get_record('companylicense', array('id' => $formdata->licenseid, 'program' => 1))) {
@@ -333,12 +339,20 @@ if (!empty($cancelled)) {
             $licenserecord = (array) $DB->get_record('companylicense', array('id' => $formdata->licenseid));
             $available_licence =$licenserecord['allocation']-$licenserecord['used'];
         }
+        echo '<div id="process_summary"><i class="fa fa-spinner fa-spin" aria-hidden="true"></i> Processing </div>';
+        echo get_string("process_result_warning","block_iomad_company_admin", $previewrows);
         // Init upload progress tracker.
-        $upt = new uu_progress_tracker();
+        $upt = new uu_progress_tracker($iid, $formdata);
         $upt->init(); // Start table.
-
+        flush();
         while ($line = $cir->next()) {
-            $upt->flush();
+         
+            if($linenum >($formdata->previewrows+1)){
+                $upt->flush(false);
+            }else{
+                $upt->flush();
+            }
+            
             $linenum++;
             $errornum = 1;
             $passeddepartment = false;
@@ -1209,54 +1223,73 @@ if (!empty($cancelled)) {
             $numlicenses = $numlicenses / count($formdata->licensecourses);
             $numlicenseerrors = $numlicenseerrors / count($formdata->licensecourses);
         }
-
-        $upt->flush();
-        $upt->close(); // Close table.
+        if($linenum >($formdata->previewrows+1)){
+            $upt->flush(false);
+        }else{
+            $upt->flush();
+        }
+        
 
         $cir->close();
         $cir->cleanup(true);
-
+        $final_out = '';
+        $final_out .=html_writer::start_div("card",array("id"=>"process_summary_below","class"=>"card card-default"));
+        $final_out .=html_writer::start_div("card card-default");
+        $final_out .=html_writer::start_div("card-body");
         // Deal with any erroring users.
         if (!empty($erroredusers)) {
-            $uniq_file =$USER->id."_".time()."_erros.csv";
-            echo get_string('erroredusers', 'block_iomad_company_admin');
-            $erroredtable = new html_table();
-            //$erroredtable->head = [get_string('firstname')get_string('firstname'),get_string('lastname'),get_string('email'),get_string('status')];
-            //file_put_contents($CFG->tempdir."/".$uniq_file, implode(",",  $erroredtable->head ).PHP_EOL,FILE_APPEND);
-            foreach ($erroredusers as $erroreduser) {
-                $erroredtable->data[] = $erroreduser;
-                file_put_contents($CFG->tempdir."/".$uniq_file, implode(",", $erroreduser).PHP_EOL,FILE_APPEND);
-            }
+            //removed by other process
+        //     $uniq_file =$USER->id."_".time()."_erros.csv";
+        //     $final_out .=get_string('erroredusers', 'block_iomad_company_admin');
+        //     $erroredtable = new html_table();
+        //     //$erroredtable->head = [get_string('firstname')get_string('firstname'),get_string('lastname'),get_string('email'),get_string('status')];
+        //     //file_put_contents($CFG->tempdir."/".$uniq_file, implode(",",  $erroredtable->head ).PHP_EOL,FILE_APPEND);
+        //     foreach ($erroredusers as $erroreduser) {
+        //         $erroredtable->data[] = $erroreduser;
+        //         file_put_contents($CFG->tempdir."/".$uniq_file, implode(",", $erroreduser).PHP_EOL,FILE_APPEND);
+        //     }
 
-            echo html_writer::table($erroredtable);
-            echo $OUTPUT->single_button(new moodle_url("/blocks/iomad_company_admin/file.php",array("file"=>$uniq_file)), get_string('download_error_result','block_iomad_company_admin'), "post", array("file"=>$uniq_file));
+        //     $final_out.= html_writer::table($erroredtable);
+        //     $final_out.= $OUTPUT->single_button(new moodle_url("/blocks/iomad_company_admin/file.php",array("file"=>$uniq_file)), get_string('download_error_result','block_iomad_company_admin'), "post", array("file"=>$uniq_file));
         }
-
-        echo $output->box_start('boxwidthnarrow boxaligncenter generalbox', 'uploadresults');
-        echo '<p>';
+        
+        
+        $final_out .=$output->box_start('boxwidthnarrow boxaligncenter generalbox', 'uploadresults');
+        $final_out .='<p>';
         if ($optype != UU_UPDATE) {
-            echo get_string('userscreated', 'tool_uploaduser').': '.$usersnew.'<br />';
+            $final_out .=get_string('userscreated', 'tool_uploaduser').': '.$usersnew.'<br />';
         }
         if ($optype == UU_UPDATE or $optype == UU_ADD_UPDATE) {
-            echo get_string('usersupdated', 'tool_uploaduser').': '.$usersupdated.'<br />';
+            $final_out .=get_string('usersupdated', 'tool_uploaduser').': '.$usersupdated.'<br />';
         }
         if ($allowdeletes) {
-            echo get_string('usersdeleted', 'tool_uploaduser').': '.$deletes.'<br />';
-            echo get_string('deleteerrors', 'tool_uploaduser').': '.$deleteerrors.'<br />';
+            $final_out .=get_string('usersdeleted', 'tool_uploaduser').': '.$deletes.'<br />';
+            $final_out .=get_string('deleteerrors', 'tool_uploaduser').': '.$deleteerrors.'<br />';
         }
         if ($allowrenames) {
-            echo get_string('usersrenamed', 'tool_uploaduser').': '.$renames.'<br />';
-            echo get_string('renameerrors', 'tool_uploaduser').': '.$renameerrors.'<br />';
+            $final_out .=get_string('usersrenamed', 'tool_uploaduser').': '.$renames.'<br />';
+            $final_out .=get_string('renameerrors', 'tool_uploaduser').': '.$renameerrors.'<br />';
         }
         if ($usersskipped) {
-            echo get_string('usersskipped', 'tool_uploaduser').': '.$usersskipped.'<br />';
+            $final_out .=get_string('usersskipped', 'tool_uploaduser').': '.$usersskipped.'<br />';
         }
-        echo get_string('usersweakpassword', 'tool_uploaduser').': '.$weakpasswords.'<br />';
-        echo get_string('errors', 'tool_uploaduser').': '.$userserrors.'</p>';
-        echo get_string('licensecount', 'block_iomad_company_admin').': '.$numlicenses.'<br />';
-        echo get_string('licenseerrors', 'block_iomad_company_admin').': '.$numlicenseerrors.'</p>';
-        echo $output->box_end();
+        $final_out .= get_string('usersweakpassword', 'tool_uploaduser').': '.$weakpasswords.'<br />';
+        $final_out .=get_string('errors', 'tool_uploaduser').': '.$userserrors.'</p>';
+        $final_out .=get_string('licensecount', 'block_iomad_company_admin').': '.$numlicenses.'<br />';
+        $final_out .=get_string('licenseerrors', 'block_iomad_company_admin').': '.$numlicenseerrors.'</p>';
+        $final_out .= $upt->download_button();
+        $final_out .=$output->box_end();
+        $final_out .=html_writer::end_div();
+        $final_out .=html_writer::end_div();
+        $final_out .=html_writer::end_div();
+        $upt->close($final_out); 
 
+        echo  $final_out;
+        echo '<script>
+        document.getElementById("process_summary").innerHTML = document.getElementById("process_summary_below").innerHTML;
+        document.getElementById("process_summary_below").style.display = "none";
+        </script>';
+        // Close table.
         if ($bulk) {
             echo $output->continue_button($bulknurl);
         } else {
@@ -1425,11 +1458,20 @@ foreach ($headings as $heading) {
 
 $haserror = false;
 $countcontent = 0;
+$uniq_error_file_path = '';
+$uniq_preview_file_path = '';
 if (in_array('error', $headings)) {
     // Print error.
     $haserror = true;
-
+    if(!$uploaded_file_name){
+        $uniq_error_file =$USER->id."_".time()."_errors.csv";
+    }else{
+        $uniq_error_file = pathinfo($uploaded_file_name, PATHINFO_FILENAME)."_".time()."_errors.csv";
+    }
+    $uniq_error_file_path = $CFG->tempdir."/iomad_bulk_logs/".$uniq_error_file;
+    file_put_contents($uniq_error_file_path, implode(",", $table->head).PHP_EOL,FILE_APPEND);
     foreach ($contents as $content) {
+        
         if (array_key_exists('error', $content)) {
             $rows = new html_table_row();
             foreach ($content as $key => $value) {
@@ -1451,6 +1493,8 @@ if (in_array('error', $headings)) {
             $countcontent++;
             $table->data[] = $rows;
         }
+        $content['error'] = is_array($content['error'])?implode("  ", $content['error']):$content['error'];
+        file_put_contents($uniq_error_file_path, implode(",", $content).PHP_EOL,FILE_APPEND);
     }
     $mform = new admin_uploaduser_form3();
     $mform->set_data(array('uutype' => $uploadtype));
@@ -1459,6 +1503,16 @@ if (in_array('error', $headings)) {
     $mform->set_data(array('uutype' => $uploadtype));
 } else {
     // Print content.
+    if(!$uploaded_file_name){
+        $uniq_preview_file =$USER->id."_".time()."_preview.csv";
+    }else{
+        $uniq_preview_file = pathinfo($uploaded_file_name, PATHINFO_FILENAME)."_".time()."_preview.csv";
+    }
+    $uniq_preview_file_path = $CFG->tempdir."/iomad_bulk_logs/".$uniq_preview_file;
+    file_put_contents($uniq_preview_file_path, implode(",", $table->head).PHP_EOL,FILE_APPEND);
+    foreach ($contents as $content) {
+        file_put_contents($uniq_preview_file_path, implode(",", $content).PHP_EOL,FILE_APPEND);
+    }
     foreach ($contents as $content) {
         $rows = new html_table_row();
         if ($countcontent >= $previewrows) {
@@ -1488,19 +1542,45 @@ if (in_array('error', $headings)) {
 }
 echo html_writer::tag('div', html_writer::table($table), array('class' => 'flexible-wrap'));
 
+
+
 if ($haserror) {
-    echo $output->container(get_string('useruploadtype', 'moodle', $choices[$uploadtype]), 'block_iomad_company_admin');
-    echo $output->container(get_string('uploadinvalidpreprocessedcount', 'moodle', $countcontent), 'block_iomad_company_admin');
-    echo $output->container(get_string('invalidusername', 'moodle'), 'block_iomad_company_admin');
-    echo $output->container(get_string('uploadfilecontainerror', 'block_iomad_company_admin'), 'block_iomad_company_admin');
+    if(file_exists($uniq_error_file_path)){
+        echo html_writer::start_div("card card-default  msg_bulk mt-2 mb-2");
+        echo html_writer::start_div("card-body");
+        $a = new \stdClass();
+        $a->total = count($contents)-1; // remving header from count.
+        $a->error = count($table->data);
+        echo  get_string("msg_bulk_error_records","block_iomad_company_admin", $a);
+        echo $OUTPUT->single_button(new moodle_url("/blocks/iomad_company_admin/file.php",array("file"=>$uniq_error_file)), get_string('download_error_result','block_iomad_company_admin'), "post",  array("file"=>$uniq_error_file,"class"=>" download_button"));
+        echo html_writer::end_div();
+        echo html_writer::end_div();
+    }
+    echo $output->container(get_string('useruploadtype', 'moodle', $choices[$uploadtype]), 'block_iomad_company_admin msg_bulk msg_bulk_uploadtype');
+    //echo $output->container(get_string('uploadinvalidpreprocessedcount', 'moodle', $countcontent), 'block_iomad_company_admin');
+    echo $output->container(get_string('invalidemail', 'block_iomad_company_admin'), 'block_iomad_company_admin msg_bulk msg_bulk_invalidemail');
+    echo $output->container(get_string('invalidusername', 'moodle'), 'block_iomad_company_admin  msg_bulk  msg_bulk_invalidusername');
+    echo $output->container(get_string('uploadfilecontainerror', 'block_iomad_company_admin'), 'block_iomad_company_admin msg_bulk  msg_bulk_uploadfile' );
 } else if (empty($contents)) {
     echo $output->container(get_string('uupreprocessedcount', 'block_iomad_company_admin', $countcontent),
-                            'block_iomad_company_admin');
-    echo $output->container(get_string('uploadfilecontentsnovaliddata', 'block_iomad_company_admin'));
+                            'block_iomad_company_admin msg_bulk_uupreprocessedcount');
+    echo $output->container(get_string('uploadfilecontentsnovaliddata', 'block_iomad_company_admin'),' msg_bulk  msg_bulk_uploadfilecontentsnovaliddata');
 } else {
-    echo $output->container(get_string('uupreprocessedcount', 'block_iomad_company_admin', $countcontent),
-                            'block_iomad_company_admin');
+
+    if(file_exists($uniq_preview_file_path)){
+        echo html_writer::start_div("card card-default  msg_bulk mt-2 mb-2");
+        echo html_writer::start_div("card-body");
+        $a = new \stdClass();
+        $a->total = count($contents); // remving header from count.
+        $a->preview = $a->total<= $previewrows?count($table->data):count($table->data)-1;
+        echo  get_string("msg_bulk_preview_records","block_iomad_company_admin", $a);
+        echo $OUTPUT->single_button(new moodle_url("/blocks/iomad_company_admin/file.php",array("file"=>$uniq_preview_file)), get_string('download_preview_result','block_iomad_company_admin'), "post",  array("file"=>$uniq_preview_file,"class"=>" download_button"));
+        echo html_writer::end_div();
+        echo html_writer::end_div();
+    }
+    
 }
+
 ?>
 <script type="text/javascript">
 Y.on('change', submit_form, '#licenseidselector');
@@ -1545,6 +1625,7 @@ die;
 
 class uu_progress_tracker {
     public $_row;
+    public $max_rows= 50;
     public $columns = array('status',
                             'line',
                             'id',
@@ -1557,32 +1638,80 @@ class uu_progress_tracker {
                             'enrolments',
                             'deleted',
                             'department');
+    private $head;
+    private $uniq_file_path ;
+    private $uniq_file;
+    private $kl;
+    public function __construct($iid, $formdata) {
+        global $USER, $CFG, $DB;
+        $this->head = array(get_string('status'),
+        get_string('uucsvline', 'tool_uploaduser'),
+        "ID",
+        get_string('username'),
+        get_string('firstname'),
+        get_string('lastname'),
+        get_string('email'),
+        get_string('password'),
+        get_string('authentication'),
+        get_string('enrolments', 'enrol'),
+        get_string('delete'),
+        get_string('department', 'block_iomad_company_admin')
+        );
 
-    public function __construct() {
+          
+        if(!$kl = $DB->get_record("iomad_bulk_upload",array("iid"=>$iid))){
+            //lets make an entry to progress table
+            $kl= new \stdClass();
+            $kl->iid = $iid;
+            $kl->formdata = json_encode($formdata);
+            $kl->timecreated = time();
+            $kl->userid = $USER->id;
+            $kl->companyid = $formdata->companyid;
+            $kl->id =  $DB->insert_record("iomad_bulk_upload",$kl);
+            $kl->uploaded_file_name = $formdata->uploaded_file_name;
+        }
+        
+        if($kl){
+            // log this under file
+            if(!$kl->uploaded_file_name){
+                $uniq_file =$USER->id."_".time()."_process.csv";
+            }else{
+                $uniq_file = pathinfo($kl->uploaded_file_name, PATHINFO_FILENAME)."_".time()."_process.csv";
+            }
+            $this->uniq_file = $uniq_file;
+            if(!is_dir($CFG->tempdir."/iomad_bulkprocess_logs/")){
+                @mkdir($CFG->tempdir."/iomad_bulkprocess_logs/",0777, true);
+            }
+            $this->uniq_file_path = $CFG->tempdir."/iomad_bulkprocess_logs/".$uniq_file;
+            file_put_contents($this->uniq_file_path, implode(",", $this->head).PHP_EOL,FILE_APPEND);
+            $kl->filepath = $uniq_file;
+            $DB->update_record('iomad_bulk_upload', $kl);
+            $this->kl = $kl;
+        }
+    }
+
+    public function download_button(){
+        global $OUTPUT;
+        return  $OUTPUT->single_button(new moodle_url("/blocks/iomad_company_admin/file.php",array("file"=>$this->uniq_file,"area"=>'iomad_bulkprocess_logs')), get_string('download_result','block_iomad_company_admin'), "post", array("file"=>$this->uniq_file));
+
     }
 
     public function init() {
+        
         $ci = 0;
+
         echo '<table id="uuresults" class="generaltable boxaligncenter flexible-wrap" summary="'.
                get_string('uploadusersresult', 'tool_uploaduser').'">';
         echo '<tr class="heading r0">';
-        echo '<th class="header c'.$ci++.'" scope="col">'.get_string('status').'</th>';
-        echo '<th class="header c'.$ci++.'" scope="col">'.get_string('uucsvline', 'tool_uploaduser').'</th>';
-        echo '<th class="header c'.$ci++.'" scope="col">ID</th>';
-        echo '<th class="header c'.$ci++.'" scope="col">'.get_string('username').'</th>';
-        echo '<th class="header c'.$ci++.'" scope="col">'.get_string('firstname').'</th>';
-        echo '<th class="header c'.$ci++.'" scope="col">'.get_string('lastname').'</th>';
-        echo '<th class="header c'.$ci++.'" scope="col">'.get_string('email').'</th>';
-        echo '<th class="header c'.$ci++.'" scope="col">'.get_string('password').'</th>';
-        echo '<th class="header c'.$ci++.'" scope="col">'.get_string('authentication').'</th>';
-        echo '<th class="header c'.$ci++.'" scope="col">'.get_string('enrolments', 'enrol').'</th>';
-        echo '<th class="header c'.$ci++.'" scope="col">'.get_string('delete').'</th>';
-        echo '<th class="header c'.$ci++.'" scope="col">'.get_string('department', 'block_iomad_company_admin').'</th>';
+        foreach ($this->head as $h){
+            echo '<th class="header c'.$ci++.'" scope="col">'.$h.'</div>';
+        }
+        get_string('status').'</th>';
         echo '</tr>';
         $this->_row = null;
     }
 
-    public function flush() {
+    public function flush($print= true) {
         if (empty($this->_row) or empty($this->_row['line']['normal'])) {
             $this->_row = array();
             foreach ($this->columns as $col) {
@@ -1592,7 +1721,10 @@ class uu_progress_tracker {
         }
         $ci = 0;
         $ri = 1;
-        echo '<tr class="r'.$ri.'">';
+        $vl = [];
+        $pl = [];
+        
+        
         foreach ($this->_row as $key => $field) {
             foreach ($field as $type => $content) {
                 if ($field[$type] !== '') {
@@ -1602,17 +1734,28 @@ class uu_progress_tracker {
                     $field[$type] = '<span class="uu'.$type.'">'.$field[$type].'</span>';
                 } else {
                     unset($field[$type]);
+                    
                 }
             }
-            echo '<td class="cell c'.$ci++.'">';
             if (!empty($field)) {
-                echo implode('<br />', $field);
+                $s = implode(" <br/> ",$field);
+                $pl[] = $s;
+                $vl[] = strip_tags($s);
             } else {
-                echo '&nbsp;';
+                $pl[] = '';
+                $vl[] = '';
             }
-            echo '</td>';
+            
         }
-        echo '</tr>';
+        if($print){
+            echo '<tr class="r'.$ri.'">';
+            foreach ($pl as $v){
+                echo '<td class="cell c'.$ci++.'">'.$v.'</td>';
+            }
+            echo '</tr>';
+            flush();
+        }
+        file_put_contents($this->uniq_file_path, implode(",", $vl).PHP_EOL,FILE_APPEND);
         foreach ($this->columns as $col) {
             $this->_row[$col] = array('normal' => '', 'info' => '', 'warning' => '', 'error' => '');
         }
@@ -1636,7 +1779,11 @@ class uu_progress_tracker {
         }
     }
 
-    public function close() {
+    public function close($logs) {
+        global $DB;
+        $this->kl->output_logs =$logs;
+        $this->kl->status = "done";
+        $DB->update_record('iomad_bulk_upload', $this->kl);
         echo '</table>';
     }
 }

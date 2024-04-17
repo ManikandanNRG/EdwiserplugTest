@@ -7,7 +7,8 @@ require_once('../../lib/filelib.php');
 require_login();
 // TODO: Need to much rework in this file
 $filename = required_param("file", PARAM_RAW);
-$filepath  = $CFG->tempdir . "/" . $filename;
+$area= optional_param("area","iomad_bulk_logs",PARAM_RAW);
+$filepath  = $CFG->tempdir . "/$area/" . $filename;
 
 if (!file_exists($filepath)) {
 

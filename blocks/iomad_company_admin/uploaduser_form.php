@@ -34,6 +34,7 @@ class admin_uploaduser_form1 extends company_moodleform {
         global $CFG, $USER;
 
         $mform =& $this->_form;
+        $mform->addElement("html",html_writer::link(new moodle_url('/blocks/iomad_company_admin/upload_logs.php'),'<i class="fa fa-history" aria-hidden="true"></i> &nbsp; '.get_string("upload_logs","block_iomad_company_admin"),array("class"=>"btn btn-primary")));
 
         $mform->addElement('filepicker', 'userfile', get_string('file'), null, array('accepted_types' => array('.csv')));
         $mform->addRule('userfile', null, 'required');
@@ -52,17 +53,47 @@ class admin_uploaduser_form1 extends company_moodleform {
         $mform->addElement('select', 'encoding', get_string('encoding', 'tool_uploaduser'), $choices);
         $mform->setDefault('encoding', 'UTF-8');
 
-        $choices = array('10' => 10, '20' => 20, '100' => 100, '1000' => 1000, '100000' => 100000);
+        $choices = array('1'=>1,'5'=>5,'10' => 10, '20' => 20, '100' => 100, );
         $mform->addElement('select', 'previewrows', get_string('rowpreviewnum', 'tool_uploaduser'), $choices);
         $mform->setType('previewrows', PARAM_INT);
+        $mform->addHelpButton("previewrows","previewrows","block_iomad_company_admin");
 
         $choices = array(UU_ADDNEW    => get_string('uuoptype_addnew', 'tool_uploaduser'),
                          UU_ADDINC    => get_string('uuoptype_addinc', 'tool_uploaduser'),
-                         UU_ADD_UPDATE => get_string('uuoptype_addupdate', 'tool_uploaduser'),
+                        UU_ADD_UPDATE => get_string('uuoptype_addupdate', 'tool_uploaduser'),
                          UU_UPDATE     => get_string('uuoptype_update', 'tool_uploaduser'));
         $mform->addElement('select', 'uutype', get_string('uuoptype', 'tool_uploaduser'), $choices);
 
         $this->add_action_buttons(false, get_string('uploadusers', 'block_iomad_company_admin'));
+    }
+
+    public function validation($data, $files) {
+        global $DB, $SESSION;
+        if (!empty($data['cancel'])) {
+            return true;
+        }
+        $errors = parent::validation($data, $files);
+        $columns =& $this->_customdata;
+        $optype  = $data['uutype'];
+        if($optype != UU_UPDATE){
+            $systemcontext = context_system::instance();
+            if (!empty($SESSION->currenteditingcompany)) {
+                $companyid = $SESSION->currenteditingcompany;
+            } else {
+                $companyid = company_user::companyid();
+            }
+            if (iomad::has_capability('block/iomad_company_admin:allocate_licenses', $systemcontext)) {
+                if (!$foundlicenses = $DB->get_records_sql_menu("SELECT id, name FROM {companylicense}
+                                                       WHERE expirydate >= :timestamp
+                                                       AND companyid = :companyid",
+                                                       array('timestamp' => time(),
+                                                             'companyid' => $companyid))) {
+                $errors['uutype'] = get_string("no_license","block_iomad_company_admin");
+
+                  }
+            }
+        } 
+        return $errors;
     }
 }
 
@@ -77,7 +108,6 @@ class admin_uploaduser_form2 extends company_moodleform {
 
         // I am the template user, why should it be the administrator? we have roles now, other ppl may use this script ;-).
         $templateuser = $USER;
-
         // Upload settings and file.
         $mform->addElement('header', 'settingsheader', get_string('settings'));
 
@@ -199,6 +229,9 @@ class admin_uploaduser_form2 extends company_moodleform {
         $mform->addElement('hidden', 'uutype');
         $mform->setType('uutype', PARAM_INT);
 
+        $mform->addElement('hidden', 'uploaded_file_name');
+        $mform->setType('uploaded_file_name', PARAM_RAW);
+
         $mform->addElement('hidden', 'companyid', $this->selectedcompany);
         $mform->setType('companyid', PARAM_INT);
     }
@@ -293,6 +326,8 @@ class admin_uploaduser_form2 extends company_moodleform {
                     $licensecourseselect->setSelected(array());
                 }
                 $mform->addElement('html', "</div></div>");
+            }else{
+                $mform->addElement("html",get_string("no_license","block_iomad_company_admin"));
             }
         }
 
@@ -363,12 +398,12 @@ class admin_uploaduser_form2 extends company_moodleform {
             
     
         }
-        if(empty($data['licenseid']) && ($optype == UU_ADDNEW || $optype == UU_ADDINC) && !iomad::has_capability('block/iomad_company_admin:company_view_all', \context_system::instance())){
+        if(empty($data['licenseid']) && ($optype == UU_ADDNEW || $optype == UU_ADDINC || $optype == UU_ADD_UPDATE) && !iomad::has_capability('block/iomad_company_admin:company_view_all', \context_system::instance())){
             $errors['licenseid'] = get_string('requiredlicense', 'block_iomad_company_admin');
         }
         //$errors['licenseid'] = 'Not enough test';
       
-        if (!empty($data['licenseid'])) {
+        if (!empty($data['licenseid']) && ($optype == UU_ADDNEW || $optype == UU_ADDINC)) {
             $license = $DB->get_record('companylicense', array('id' => $data['licenseid']));
 
             // Are we dealing with a program license?
