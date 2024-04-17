@@ -425,7 +425,7 @@ class admin_uploaduser_form2 extends company_moodleform {
                     $requiredcount = $data['readcount'] - 1;
                 }
             } else {
-                $requiredcount = 0;
+                $errors['licenseid'] = get_string('licensecourses_error','block_iomad_company_admin') ;
             }
             if (empty($license->program)) {
                 $free = ($license->allocation - $license->used);

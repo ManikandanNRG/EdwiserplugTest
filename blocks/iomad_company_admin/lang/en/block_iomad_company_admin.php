@@ -804,3 +804,4 @@ $string['summary'] = 'Summary';
 $string['process_result_warning'] = '<div class="alert alert-warning">We will only show {$a} result, however, you will get the download button, once complete procss is done.</div>';
 $string['download_result'] = 'Download output';
 $string['upload_logs'] = "Previous upload logs";
+$string['licensecourses_error'] = 'license course is required.';

@@ -11,6 +11,23 @@ function xmldb_local_akt_install() {
         $dbman->add_field($table, $field);
     }
 
+    try{
+    $DB->execute("CREATE TABLE IF NOT EXISTS `mdl_iomad_bulk_upload` (
+        `id` int NOT NULL AUTO_INCREMENT,
+        `formdata` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+        `output_logs` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        `timecreated` int NOT NULL,
+        `userid` int NOT NULL,
+        `companyid` int NOT NULL,
+        `iid` int NOT NULL,
+        `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'todo',
+        `filepath` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+        PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    }catch(\Exception $ex){
+
+    }
+
     $authrole = $DB->get_record('role', array('shortname' => "companydepartmentmanager"));
     
     assign_capability('block/iomad_company_admin:edit_departments', CAP_ALLOW, $authrole->id , \context_system::instance()->id);

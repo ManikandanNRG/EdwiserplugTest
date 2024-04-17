@@ -1549,7 +1549,7 @@ if ($haserror) {
         echo html_writer::start_div("card card-default  msg_bulk mt-2 mb-2");
         echo html_writer::start_div("card-body");
         $a = new \stdClass();
-        $a->total = count($contents)-1; // remving header from count.
+        $a->total = count($contents); // remving header from count.
         $a->error = count($table->data);
         echo  get_string("msg_bulk_error_records","block_iomad_company_admin", $a);
         echo $OUTPUT->single_button(new moodle_url("/blocks/iomad_company_admin/file.php",array("file"=>$uniq_error_file)), get_string('download_error_result','block_iomad_company_admin'), "post",  array("file"=>$uniq_error_file,"class"=>" download_button"));
