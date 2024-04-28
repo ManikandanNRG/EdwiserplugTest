@@ -50,6 +50,13 @@ class company_license_table extends table_sql {
         return $licensetypes[$row->type];
     }
 
+    public function col_mapping($row) {
+        $mapping = [0 => "",
+                         1 => "Auto Assign",
+    ];
+
+        return $mapping[$row->mapping];
+    }
     /**
      * Generate the display of the license program value
      * @param object $license the table row being output.

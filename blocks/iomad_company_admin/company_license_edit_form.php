@@ -152,7 +152,7 @@ if ( $mform->is_cancelled() || optional_param('cancel', false, PARAM_BOOL) ) {
         }
         $licensedata['validlength'] = $data->validlength;
         $licensedata['type'] = $data->type;
-
+        $licensedata['mapping'] = $data->mapping;
         if (empty($data->cutoffdate)) {
             $licensedata['cutoffdate'] = 0;
         } else {

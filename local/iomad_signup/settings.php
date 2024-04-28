@@ -92,4 +92,17 @@ if ($hassiteconfig && !empty($USER->id)) {
         set_config('local_iomad_signup_role', 0);
         set_config('local_iomad_signup_company', 0);
     }
+
+    $settings->add(new admin_setting_configcheckbox(
+        'local_iomad_signup_assigncompany_basedon_session',
+        get_string('assigncompany_basedon_session', 'local_iomad_signup'),
+        get_string('assigncompany_basedon_session_help', 'local_iomad_signup'),
+        0)
+    );
+    $settings->add(new admin_setting_configcheckbox(
+        'local_iomad_signup_assign_autolicense',
+        get_string('assign_autolicense', 'local_iomad_signup'),
+        get_string('assign_autolicense_help', 'local_iomad_signup'),
+        0)
+    );
 }

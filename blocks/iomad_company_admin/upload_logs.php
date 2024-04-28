@@ -38,8 +38,11 @@ $sql .= " inner join {company} c on c.id = b.companyid  ";
 $sql .= " where  c.id = $companyid ";
 $sql .= "  order by b.timecreated desc";
 
-
+try{
 $totalrecord = $DB->count_records_sql($sql);
+}catch(\Exception $ex){
+    $totalrecord = 0;
+}
 $sql .=" limit $offset, $limit ";
 $records = $DB->get_records_sql($sql);
 $table = new html_table();

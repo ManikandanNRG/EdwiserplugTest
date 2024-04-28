@@ -31,7 +31,7 @@ require_once($CFG->dirroot.'/local/iomad/lib/company.php');
  * @param mixed $user user id or user object
  */
 function local_iomad_signup_user_created($user) {
-    global $CFG, $DB;
+    global $CFG, $DB, $SESSION;
 
     // check if we already have the user object
     if (is_int($user)) {
@@ -93,7 +93,32 @@ function local_iomad_signup_user_created($user) {
 
             // Force the company theme in case it's not already been done.
             $DB->set_field('user', 'theme', $company->get_theme(), array('id' => $user->id));
-        } else if (!empty($CFG->local_iomad_signup_company)) {
+        } elseif($SESSION->currenteditingcompany && $CFG->local_iomad_signup_assigncompany_basedon_session){
+            // assign to current selected company
+
+            $company = new company($SESSION->currenteditingcompany);
+
+            // Get the full user information for department matching.
+            profile_load_data($user);
+
+            // Do we have a company departmet profile field?
+            $autodepartmentid = $company->get_auto_department($user);
+
+            // assign the user to the company.
+            $company->assign_user_to_company($user->id, $autodepartmentid);
+
+            // Deal with company defaults
+            $defaults = $company->get_user_defaults();
+            foreach ($defaults as $index => $value) {
+                $user->$index = $value;
+            }
+
+	        $DB->update_record('user', $user);
+            profile_save_data($user);
+
+            // Force the company theme in case it's not already been done.
+            $DB->set_field('user', 'theme', $company->get_theme(), array('id' => $user->id));
+        }else if (!empty($CFG->local_iomad_signup_company)) {
             // Do we have a company to assign?
             // Get company.
             $company = new company($CFG->local_iomad_signup_company);
@@ -118,6 +143,48 @@ function local_iomad_signup_user_created($user) {
 
             // Force the company theme in case it's not already been done.
             $DB->set_field('user', 'theme', $company->get_theme(), array('id' => $user->id));
+        }
+        
+        if($CFG->local_iomad_signup_assign_autolicense && $company){
+            // license
+            $license_to_assign = '';
+            $licenses = $DB->get_records('companylicense', array('companyid' => $company->id,"mapping"=>1), 'expirydate DESC', 'id,name,startdate,expirydate,allocation,used');
+            if (!empty($licenses)) {
+                foreach ($licenses as $license) {
+                    if ($license->expirydate > time() && $license->used < $license->allocation) {
+                        // check usage count, if available
+                        $license_to_assign  = $license;
+                        break;
+                    }
+                }
+            }
+            if($license_to_assign && $user){
+                $license_courses = $DB->get_records("companylicense_courses", array("licenseid"=>$license_to_assign->id));
+                foreach ($license_courses as $lc){
+                        $recordarray = array('licensecourseid' => $lc->courseid,
+                                             'userid' => $user->id,
+                                             'timecompleted' => null);
+
+                        // Check if we are not assigning multiple times.
+                        if (!$DB->get_record('companylicense_users', $recordarray)) {
+                            $recordarray['licenseid'] = $license_to_assign->id;
+                            $recordarray['issuedate'] = time();
+                            $recordarray['isusing'] = 0;
+                            $recordarray['id'] = $DB->insert_record('companylicense_users', $recordarray);
+                            // Create an event.
+                            $eventother = array('licenseid' => $license_to_assign->id,
+                                                'issuedate' => $recordarray['issuedate'],
+                                                'duedate' => '');
+                            $event = \block_iomad_company_admin\event\user_license_assigned::create(array('context' => \context_course::instance($lc->courseid),
+                                                                                                          'objectid' => $recordarray['id'],
+                                                                                                          'courseid' => $lc->courseid,
+                                                                                                          'userid' => $user->id,
+                                                                                                          'other' => $eventother));
+                            $event->trigger();
+                        }
+                }
+
+            }
         }
 
         // Do we have a role to assign?

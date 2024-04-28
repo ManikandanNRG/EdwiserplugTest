@@ -12,7 +12,7 @@ function xmldb_local_akt_install() {
     }
 
     try{
-    $DB->execute("CREATE TABLE IF NOT EXISTS `mdl_iomad_bulk_upload` (
+    $DB->execute("CREATE TABLE IF NOT EXISTS {iomad_bulk_upload} (
         `id` int NOT NULL AUTO_INCREMENT,
         `formdata` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
         `output_logs` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
@@ -24,6 +24,7 @@ function xmldb_local_akt_install() {
         `filepath` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
         PRIMARY KEY (`id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    $DB->execute("ALTER TABLE {companylicense} ADD `mapping` INT NULL DEFAULT '0' COMMENT '0: manual, 1 :automatic' AFTER `clearonexpire`");
     }catch(\Exception $ex){
 
     }

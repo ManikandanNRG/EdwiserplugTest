@@ -805,3 +805,7 @@ $string['process_result_warning'] = '<div class="alert alert-warning">We will on
 $string['download_result'] = 'Download output';
 $string['upload_logs'] = "Previous upload logs";
 $string['licensecourses_error'] = 'license course is required.';
+$string['apply_to_existing'] = 'Apply to existing';
+$string['apply_to_existing_help'] = 'License expiry date will be impactedon enrolement';
+$string['licensemapping'] = 'Auto License Mapping for Oauth2 Users';
+$string['licensemapping_help'] = 'License will be used to allocate for oauth2 users';

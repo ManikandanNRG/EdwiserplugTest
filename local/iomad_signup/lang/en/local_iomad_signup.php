@@ -43,4 +43,7 @@ $string['showinstructions'] = 'Show the self signup instructions on the login pa
 $string['showinstructions_help'] = 'By default Moodle will show the self signup intructions on the login page when self enrol is enabled.  This allows them to be removed';
 $string['useemail'] = 'Force email to be username';
 $string['useemail_help'] = 'Selecting this will remove the option for a user to select their own username.  Their email address will be used instead.';
-
+$string['assigncompany_basedon_session_help'] = 'Assign company based on session or url for new user account, based on select authentication type.';
+$string['assigncompany_basedon_session'] = 'Assign company based on session';
+$string['assign_autolicense'] = 'Assign license to new user';
+$string['assign_autolicense_help'] = 'License will be assigned to new user based on license mapping which has auto enabled. iff there is and limit is available.';

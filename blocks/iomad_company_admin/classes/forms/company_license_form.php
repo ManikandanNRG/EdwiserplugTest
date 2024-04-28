@@ -181,6 +181,10 @@ class company_license_form extends \company_moodleform {
             
             $mform->addElement('select', 'type', get_string('licensetype', 'block_iomad_company_admin'), $licensetypes);
             $mform->addHelpButton('type', 'licensetype', 'block_iomad_company_admin');
+            
+            $mform->addElement('advcheckbox', 'mapping', get_string('licensemapping', 'block_iomad_company_admin'));
+            $mform->addHelpButton('mapping', 'licensemapping', 'block_iomad_company_admin');
+            
             $mform->addElement('selectyesno', 'program', get_string('licenseprogram', 'block_iomad_company_admin'));
             $mform->addHelpButton('program', 'licenseprogram', 'block_iomad_company_admin');
             $mform->addElement('selectyesno', 'instant', get_string('licenseinstant', 'block_iomad_company_admin'));
