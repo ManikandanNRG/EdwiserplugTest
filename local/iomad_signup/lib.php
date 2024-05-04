@@ -149,42 +149,39 @@ function local_iomad_signup_user_created($user) {
             // license
             $license_to_assign = '';
             $licenses = $DB->get_records('companylicense', array('companyid' => $company->id,"mapping"=>1), 'expirydate DESC', 'id,name,startdate,expirydate,allocation,used');
-            if (!empty($licenses)) {
+            if (!empty($licenses) && $user) {
                 foreach ($licenses as $license) {
                     if ($license->expirydate > time() && $license->used < $license->allocation) {
                         // check usage count, if available
                         $license_to_assign  = $license;
-                        break;
+                        $license_courses = $DB->get_records("companylicense_courses", array("licenseid"=>$license_to_assign->id));
+                        foreach ($license_courses as $lc){
+                                $recordarray = array('licensecourseid' => $lc->courseid,
+                                                    'userid' => $user->id,
+                                                    'timecompleted' => null);
+
+                                // Check if we are not assigning multiple times.
+                                if (!$DB->get_record('companylicense_users', $recordarray)) {
+                                    $recordarray['licenseid'] = $license_to_assign->id;
+                                    $recordarray['issuedate'] = time();
+                                    $recordarray['isusing'] = 0;
+                                    $recordarray['id'] = $DB->insert_record('companylicense_users', $recordarray);
+                                    // Create an event.
+                                    $eventother = array('licenseid' => $license_to_assign->id,
+                                                        'issuedate' => $recordarray['issuedate'],
+                                                        'duedate' => '');
+                                    $event = \block_iomad_company_admin\event\user_license_assigned::create(array('context' => \context_course::instance($lc->courseid),
+                                                                                                                'objectid' => $recordarray['id'],
+                                                                                                                'courseid' => $lc->courseid,
+                                                                                                                'userid' => $user->id,
+                                                                                                                'other' => $eventother));
+                                    $event->trigger();
+                                }
+                        }
                     }
                 }
             }
-            if($license_to_assign && $user){
-                $license_courses = $DB->get_records("companylicense_courses", array("licenseid"=>$license_to_assign->id));
-                foreach ($license_courses as $lc){
-                        $recordarray = array('licensecourseid' => $lc->courseid,
-                                             'userid' => $user->id,
-                                             'timecompleted' => null);
-
-                        // Check if we are not assigning multiple times.
-                        if (!$DB->get_record('companylicense_users', $recordarray)) {
-                            $recordarray['licenseid'] = $license_to_assign->id;
-                            $recordarray['issuedate'] = time();
-                            $recordarray['isusing'] = 0;
-                            $recordarray['id'] = $DB->insert_record('companylicense_users', $recordarray);
-                            // Create an event.
-                            $eventother = array('licenseid' => $license_to_assign->id,
-                                                'issuedate' => $recordarray['issuedate'],
-                                                'duedate' => '');
-                            $event = \block_iomad_company_admin\event\user_license_assigned::create(array('context' => \context_course::instance($lc->courseid),
-                                                                                                          'objectid' => $recordarray['id'],
-                                                                                                          'courseid' => $lc->courseid,
-                                                                                                          'userid' => $user->id,
-                                                                                                          'other' => $eventother));
-                            $event->trigger();
-                        }
-                }
-
-            }
+       
         }
 
         // Do we have a role to assign?

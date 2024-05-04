@@ -63,6 +63,11 @@ class admin_uploaduser_form1 extends company_moodleform {
                         UU_ADD_UPDATE => get_string('uuoptype_addupdate', 'tool_uploaduser'),
                          UU_UPDATE     => get_string('uuoptype_update', 'tool_uploaduser'));
         $mform->addElement('select', 'uutype', get_string('uuoptype', 'tool_uploaduser'), $choices);
+        $mform->addElement('html','<style>
+        #fitem_id_delimiter_name, #fitem_id_encoding {
+display:none;
+        }
+        </style>');
 
         $this->add_action_buttons(false, get_string('uploadusers', 'block_iomad_company_admin'));
     }
@@ -104,8 +109,9 @@ class admin_uploaduser_form2 extends company_moodleform {
         global $CFG, $USER, $SESSION;
 
         $mform   =& $this->_form;
-        $columns =& $this->_customdata;
-
+        $columns =& $this->_customdata['columns'];
+        $uutype =& $this->_customdata['uutype'];
+        $selectyesno = [''=>get_string('select_option','block_iomad_company_admin'),"0"=>"No","1"=>"Yes"];
         // I am the template user, why should it be the administrator? we have roles now, other ppl may use this script ;-).
         $templateuser = $USER;
         // Upload settings and file.
@@ -113,52 +119,73 @@ class admin_uploaduser_form2 extends company_moodleform {
 
         $mform->addElement('static', 'uutypelabel', get_string('uuoptype', 'tool_uploaduser'));
 
-        $choices = array(0 => get_string('infilefield', 'auth'), 1 => get_string('createpasswordifneeded', 'auth'));
+        $choices = array(''=>get_string('select_option','block_iomad_company_admin'),0 => get_string('infilefield', 'auth'), 1 => get_string('createpasswordifneeded', 'auth'));
         $mform->addElement('select', 'uupasswordnew', get_string('uupasswordnew', 'tool_uploaduser'), $choices);
-        $mform->setDefault('uupasswordnew', 1);
+        //$mform->setDefault('uupasswordnew', 1);
+        if($uutype != UU_UPDATE){
+            $mform->addRule('uupasswordnew',get_string('required'),'required',null,'client');
+        }
         $mform->disabledIf('uupasswordnew', 'uutype', 'eq', UU_UPDATE);
 
-        $mform->addElement('selectyesno', 'sendnewpasswordemails',
-                            get_string('sendnewpasswordemails', 'block_iomad_company_admin'));
-        $mform->setDefault('sendnewpasswordemails', 1);
-
-        $choices = array(0 => get_string('nochanges', 'tool_uploaduser'),
+        $mform->addElement('select', 'sendnewpasswordemails',
+                            get_string('sendnewpasswordemails', 'block_iomad_company_admin'),$selectyesno);
+       $mform->addRule('sendnewpasswordemails',get_string('required'),'required',null,'client');
+        $choices = array(''=>get_string('select_option','block_iomad_company_admin'),
+            0 => get_string('nochanges', 'tool_uploaduser'),
                          1 => get_string('uuupdatefromfile', 'tool_uploaduser'),
                          2 => get_string('uuupdateall', 'tool_uploaduser'),
                          3 => get_string('uuupdatemissing', 'tool_uploaduser'));
         $mform->addElement('select', 'uuupdatetype', get_string('uuupdatetype', 'tool_uploaduser'), $choices);
-        $mform->setDefault('uuupdatetype', 0);
+       // $mform->setDefault('uuupdatetype', 0);
+       
         $mform->disabledIf('uuupdatetype', 'uutype', 'eq', UU_ADDNEW);
         $mform->disabledIf('uuupdatetype', 'uutype', 'eq', UU_ADDINC);
+        if($uutype != UU_ADDNEW && $uutype != UU_ADDINC){
+            $mform->addRule('uuupdatetype',get_string('required'),'required',null,'client');
+        }
 
-        $choices = array(0 => get_string('nochanges', 'tool_uploaduser'), 1 => get_string('update'));
+        $choices = array(''=>get_string('select_option','block_iomad_company_admin'),
+            0 => get_string('nochanges', 'tool_uploaduser'), 1 => get_string('update'));
         $mform->addElement('select', 'uupasswordold', get_string('uupasswordold', 'tool_uploaduser'), $choices);
-        $mform->setDefault('uupasswordold', 0);
+        //$mform->setDefault('uupasswordold', 0);
+        if($uutype != UU_ADDNEW && $uutype != UU_ADDINC){
+            $mform->addRule('uupasswordold',get_string('required'),'required',null,'client');
+        }
         $mform->disabledIf('uupasswordold', 'uutype', 'eq', UU_ADDNEW);
         $mform->disabledIf('uupasswordold', 'uutype', 'eq', UU_ADDINC);
-        $mform->disabledIf('uupasswordold', 'uuupdatetype', 'eq', 0);
-        $mform->disabledIf('uupasswordold', 'uuupdatetype', 'eq', 3);
+        //$mform->disabledIf('uupasswordold', 'uuupdatetype', 'eq', 0);
+        //$mform->disabledIf('uupasswordold', 'uuupdatetype', 'eq', 3);
 
-        $mform->addElement('selectyesno', 'uuallowrenames', get_string('allowrenames', 'tool_uploaduser'));
-        $mform->setDefault('uuallowrenames', 0);
+        $mform->addElement('select', 'uuallowrenames', get_string('allowrenames', 'tool_uploaduser'),$selectyesno);
+        //$mform->setDefault('uuallowrenames', 0);
+        if($uutype != UU_ADDNEW && $uutype != UU_ADDINC){
+            $mform->addRule('uuallowrenames',get_string('required'),'required',null,'client');
+        }
+        
         $mform->disabledIf('uuallowrenames', 'uutype', 'eq', UU_ADDNEW);
         $mform->disabledIf('uuallowrenames', 'uutype', 'eq', UU_ADDINC);
 
-        $mform->addElement('selectyesno', 'uuallowdeletes', get_string('allowdeletes', 'tool_uploaduser'));
-        $mform->setDefault('uuallowdeletes', 0);
+        $mform->addElement('select', 'uuallowdeletes', get_string('allowdeletes', 'tool_uploaduser'),$selectyesno);
+        //$mform->setDefault('uuallowdeletes', 0);
+        if($uutype != UU_ADDNEW && $uutype != UU_ADDINC){
+            $mform->addRule('uuallowdeletes',get_string('required'),'required',null,'client');
+        }
         $mform->disabledIf('uuallowdeletes', 'uutype', 'eq', UU_ADDNEW);
         $mform->disabledIf('uuallowdeletes', 'uutype', 'eq', UU_ADDINC);
 
-        $mform->addElement('selectyesno', 'uunoemailduplicates', get_string('uunoemailduplicates', 'tool_uploaduser'));
-        $mform->setDefault('uunoemailduplicates', 1);
+        $mform->addElement('select', 'uunoemailduplicates', get_string('uunoemailduplicates', 'tool_uploaduser'),$selectyesno);
+        //$mform->setDefault('uunoemailduplicates', 1);
+        $mform->addRule('uunoemailduplicates',get_string('required'),'required',null,'client');
 
-        $choices = array(0 => get_string('no'),
+        $choices = array(
+            ''=>get_string('select_option','block_iomad_company_admin'),
+            0 => get_string('no'),
                          1 => get_string('uubulknew', 'tool_uploaduser'),
                          2 => get_string('uubulkupdated', 'tool_uploaduser'),
                          3 => get_string('uubulkall', 'tool_uploaduser'));
         $mform->addElement('select', 'uubulk', get_string('uubulk', 'tool_uploaduser'), $choices);
         $mform->setDefault('uubulk', 0);
-
+        
         // Roles selection.
         $showroles = false;
         foreach ($columns as $column) {
@@ -243,7 +270,7 @@ class admin_uploaduser_form2 extends company_moodleform {
         global $USER, $SESSION, $DB, $output;
 
         $mform   =& $this->_form;
-        $columns =& $this->_customdata;
+        $columns =& $this->_customdata['columns'];
 
         foreach ($columns as $column) {
             if ($mform->elementExists($column)) {
@@ -330,7 +357,11 @@ class admin_uploaduser_form2 extends company_moodleform {
                 $mform->addElement("html",get_string("no_license","block_iomad_company_admin"));
             }
         }
+        
 
+        $mform->addElement('advcheckbox', 'confirm_upload', get_string("upload_confirm","block_iomad_company_admin"));
+        $mform->addRule('confirm_upload',get_string('required'),'required');
+        $mform->closeHeaderBefore('confirm_upload');
         $this->add_action_buttons(true, get_string('uploadusers', 'tool_uploaduser'));
     }
 
@@ -343,9 +374,12 @@ class admin_uploaduser_form2 extends company_moodleform {
             return true;
         }
         $errors = parent::validation($data, $files);
-        $columns =& $this->_customdata;
+        $columns =& $this->_customdata['columns'];
         $optype  = $data['uutype'];
 
+        if(empty($data['confirm_upload'])){
+            $errors['confirm_upload'] = get_string('requried_confirm', 'block_iomad_company_admin');
+        }
         // Detect if password column needed in file.
         if (!in_array('password', $columns)) {
             switch ($optype) {

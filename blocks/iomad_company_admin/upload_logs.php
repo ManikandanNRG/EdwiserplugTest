@@ -3,7 +3,7 @@
 require_once(dirname(__FILE__) . '/../../config.php'); // Creates $PAGE.
 $systemcontext = context_system::instance();
 $page = optional_param("page", 0, PARAM_INT);
-$perpage = optional_param("perpage", 2, PARAM_INT);
+$perpage = optional_param("perpage", 10, PARAM_INT);
 $params = [];
 $params['page'] = $page;
 $params['perpage'] = $perpage;
@@ -39,7 +39,7 @@ $sql .= " where  c.id = $companyid ";
 $sql .= "  order by b.timecreated desc";
 
 try{
-$totalrecord = $DB->count_records_sql($sql);
+$totalrecord = $DB->count_records_sql("select count(1) from ($sql) t");
 }catch(\Exception $ex){
     $totalrecord = 0;
 }

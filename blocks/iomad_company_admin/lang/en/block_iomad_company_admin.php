@@ -783,22 +783,21 @@ $string['delete_last_access'] = "User has accessed the system, so can not be del
 $string['manage_liceses'] = 'Manage Licenses';
 $string['userdeletedwitherror'] = 'Except following users ( {$a}), rest are deleted successfully.';
 $string['multiuserdeletedok'] = ' {$a} user deleted successfully.';
-$string['download_error_result'] = 'Download Error Result';
+$string['download_error_result'] = 'Download Error Log';
 $string['invalidemail'] = 'Invalid email address found in your sheet. Please check your file and upload again.';
 $string['previewrows_help'] = ' At each step , you will be able to download the output file.';
 $string['csvloaderror'] = 'An error occurred while loading the CSV file: {$a}.</br>
 make sure to remove the [action, error] columns from the sheet and upload again
 ';
 $string['msg_bulk_error_records'] = '
-<p> We did a basic check and found that, out of {$a->total} uploaded records {$a->error} record(s) have error(s).
-</p>
-<p> You can download the sheet by clicking on download button and re-upload after correction. </p>
-<p> Make sure to remove action and error column before re-upload.</p>
+<p class="text-danger">Errors Found - User Management Stopped</p>
+<p>Errors found in your upload. Please fix the errors and re-upload wihtout any unnecessary columns.</p>
 ';
 
-$string['msg_bulk_preview_records'] = '<p>We are showing {$a->preview} record(s) out of {$a->total} record(s).</p>
-<p> You can download the sheet with all records by clicking on download button </p>';
-$string['download_preview_result'] = 'Download Preview Result';
+$string['msg_bulk_preview_records'] = '
+<p style="color:#28a745 "> No Errors Found- User Management Started</p>
+<p> Complete the following settings to create users. </p>';
+$string['download_preview_result'] = 'Download Log';
 $string['no_license'] = '<div class="alert alert-warning">License are required to create account, but, you do not have any active license.</div>';
 $string['summary'] = 'Summary';
 $string['process_result_warning'] = '<div class="alert alert-warning">We will only show {$a} result, however, you will get the download button, once complete procss is done.</div>';
@@ -809,3 +808,6 @@ $string['apply_to_existing'] = 'Apply to existing';
 $string['apply_to_existing_help'] = 'License expiry date will be impactedon enrolement';
 $string['licensemapping'] = 'Auto License Mapping for Oauth2 Users';
 $string['licensemapping_help'] = 'License will be used to allocate for oauth2 users';
+$string['upload_confirm'] = 'Please cross check all the options as this operation can not be rollback.';
+$string['requried_confirm'] = 'Confirmation required';
+$string['select_option'] = '--Please Select-- ';

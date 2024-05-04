@@ -241,7 +241,7 @@ if (!$columns = $cir->get_columns()) {
     print_error('cannotreadtmpfile', 'error', $returnurl);
 }
 
-$mform = new admin_uploaduser_form2(null, $columns);
+$mform = new admin_uploaduser_form2(null, array("columns"=>$columns,"uutype"=>$uploadtype));
 // Get initial date from form1.
 $mform->set_data(array('iid' => $iid,
                        'previewrows' => $previewrows,
@@ -998,10 +998,12 @@ if (!empty($cancelled)) {
                 } else {
                     $user->preference_auth_forcepasswordchange = false;
                 }
+                try{
                 $user->id = company_user::create($user);
 
                 // Save the profile information.
                 profile_save_data($user);
+                
 
                 // Are we being passed company departments?
                 if ($passeddepartment) {
@@ -1012,6 +1014,15 @@ if (!empty($cancelled)) {
                 $upt->track('status', $struseradded);
                 $upt->track('id', $user->id, 'normal', false);
                 $usersnew++;
+                }catch(\Exception $ex){
+                    $upt->track('status',  "User not added -".strip_tags($ex->getMessage()), 'error');
+                    $line[] = $ex->getMessage();
+                    $errornum++;
+                    $userserrors++;
+                    $erroredusers[] = $line;
+                   
+                    continue;
+                }
             }
 
             // Find course enrolments, groups, roles/types and enrol periods.
@@ -1556,11 +1567,11 @@ if ($haserror) {
         echo html_writer::end_div();
         echo html_writer::end_div();
     }
-    echo $output->container(get_string('useruploadtype', 'moodle', $choices[$uploadtype]), 'block_iomad_company_admin msg_bulk msg_bulk_uploadtype');
+   // echo $output->container(get_string('useruploadtype', 'moodle', $choices[$uploadtype]), 'block_iomad_company_admin msg_bulk msg_bulk_uploadtype');
     //echo $output->container(get_string('uploadinvalidpreprocessedcount', 'moodle', $countcontent), 'block_iomad_company_admin');
-    echo $output->container(get_string('invalidemail', 'block_iomad_company_admin'), 'block_iomad_company_admin msg_bulk msg_bulk_invalidemail');
-    echo $output->container(get_string('invalidusername', 'moodle'), 'block_iomad_company_admin  msg_bulk  msg_bulk_invalidusername');
-    echo $output->container(get_string('uploadfilecontainerror', 'block_iomad_company_admin'), 'block_iomad_company_admin msg_bulk  msg_bulk_uploadfile' );
+    //echo $output->container(get_string('invalidemail', 'block_iomad_company_admin'), 'block_iomad_company_admin msg_bulk msg_bulk_invalidemail');
+    //echo $output->container(get_string('invalidusername', 'moodle'), 'block_iomad_company_admin  msg_bulk  msg_bulk_invalidusername');
+    //echo $output->container(get_string('uploadfilecontainerror', 'block_iomad_company_admin'), 'block_iomad_company_admin msg_bulk  msg_bulk_uploadfile' );
 } else if (empty($contents)) {
     echo $output->container(get_string('uupreprocessedcount', 'block_iomad_company_admin', $countcontent),
                             'block_iomad_company_admin msg_bulk_uupreprocessedcount');
@@ -1755,7 +1766,10 @@ class uu_progress_tracker {
             echo '</tr>';
             flush();
         }
-        file_put_contents($this->uniq_file_path, implode(",", $vl).PHP_EOL,FILE_APPEND);
+        //file_put_contents($this->uniq_file_path, implode(",", $vl).PHP_EOL,FILE_APPEND);
+        $h = fopen($this->uniq_file_path, 'a');
+        fputcsv($h,$vl);
+        fclose($h);
         foreach ($this->columns as $col) {
             $this->_row[$col] = array('normal' => '', 'info' => '', 'warning' => '', 'error' => '');
         }
