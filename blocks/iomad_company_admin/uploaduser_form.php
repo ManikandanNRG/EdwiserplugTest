@@ -271,7 +271,7 @@ class admin_uploaduser_form2 extends company_moodleform {
 
         $mform   =& $this->_form;
         $columns =& $this->_customdata['columns'];
-
+        $uutype =& $this->_customdata['uutype'];
         foreach ($columns as $column) {
             if ($mform->elementExists($column)) {
                 $mform->removeElement($column);
@@ -317,7 +317,7 @@ class admin_uploaduser_form2 extends company_moodleform {
                                                    AND companyid = :companyid",
                                                    array('timestamp' => time(),
                                                          'companyid' => $this->selectedcompany))) {
-                $licenses = array('0' => get_string('nolicense', 'block_iomad_company_admin')) + $foundlicenses;
+                $licenses = array('' => get_string('nolicense', 'block_iomad_company_admin')) + $foundlicenses;
                 list($mylicenseid, $mylicensecourse) = current($licenses);
                 $mform->addElement('html', "<div class='fitem'><div class='fitemtitle'>" .
                                             get_string('selectlicensecourse', 'block_iomad_company_admin') .
@@ -347,20 +347,25 @@ class admin_uploaduser_form2 extends company_moodleform {
                 $licensecourseselect->setMultiple(true);
                 $mform->addElement('html', '</div>');
 
+                if(($uutype == UU_ADDNEW || $uutype == UU_ADDINC || $uutype == UU_ADD_UPDATE)){
+                    $mform->addRule('licenseid',get_string('required'),'required', null, 'client');
+                    $mform->addRule('licensecourses',get_string('required'),'required', null, 'client');
+                }
+
                 if (!empty($mylicensedetails->program)) {
                     $licensecourseselect->setSelected($licensecourses);
                 } else {
                     $licensecourseselect->setSelected(array());
                 }
-                $mform->addElement('html', "</div></div>");
+                $mform->addElement('html', "<style>span.error{color:#ef1010}</style></div></div>");
             }else{
                 $mform->addElement("html",get_string("no_license","block_iomad_company_admin"));
             }
         }
         
 
-        $mform->addElement('advcheckbox', 'confirm_upload', get_string("upload_confirm","block_iomad_company_admin"));
-        $mform->addRule('confirm_upload',get_string('required'),'required');
+        $mform->addElement('select', 'confirm_upload', get_string("upload_confirm","block_iomad_company_admin"),array(""=>"No","1"=>"Yes"));
+        $mform->addRule('confirm_upload',get_string('required'),'required', null, 'client');
         $mform->closeHeaderBefore('confirm_upload');
         $this->add_action_buttons(true, get_string('uploadusers', 'tool_uploaduser'));
     }
