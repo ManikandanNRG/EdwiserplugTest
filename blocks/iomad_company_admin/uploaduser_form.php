@@ -87,7 +87,7 @@ display:none;
             } else {
                 $companyid = company_user::companyid();
             }
-            if (iomad::has_capability('block/iomad_company_admin:allocate_licenses', $systemcontext)) {
+            if (iomad::has_capability('block/iomad_company_admin:allocate_licenses', $systemcontext) &&  !iomad::has_capability('block/iomad_company_admin:company_view_all', $systemcontext)) {
                 if (!$foundlicenses = $DB->get_records_sql_menu("SELECT id, name FROM {companylicense}
                                                        WHERE expirydate >= :timestamp
                                                        AND companyid = :companyid",
