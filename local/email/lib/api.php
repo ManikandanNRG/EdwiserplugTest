@@ -813,6 +813,10 @@ class EmailTemplate {
     private static function email_direct($emailaddress, $supportuser, $subject, $messagetext, $messagehtml = '', $attachment = null, $companyid = 0) {
         global $USER, $CFG;
 
+	if (substr($emailaddress, -8) == '.invalid') {
+            debugging("email_to_user:  email domain $emailaddress is invalid! Not sending.");
+            return true; // This is not an error.
+        }
         $mail = get_mailer();
         company::set_company_mailer($mail, $companyid);
 
