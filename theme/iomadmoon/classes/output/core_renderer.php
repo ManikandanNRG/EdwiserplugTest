@@ -2316,6 +2316,19 @@ class core_renderer extends \core_renderer {
             );
         }
 
+        $context->hidemanuallogin = 1;
+        if(@get_config('local_akt', 'hide_login_form')){
+            $forcom = get_config('local_akt', 'for_company');
+            if($forcom){
+                $forcom = explode(",", $forcom);
+            }
+            
+            if(@!$_GET['login'] == 'manual' && in_array($SESSION->currenteditingcompany, $forcom)){
+                $context->hidemanuallogin = 0;
+            }else{
+                $context->hidemanuallogin = 1;
+            }
+        }
         return $this->render_from_template('core/loginform', $context);
     }
 

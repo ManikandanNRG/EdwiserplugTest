@@ -811,3 +811,6 @@ $string['licensemapping_help'] = 'License will be used to allocate for oauth2 us
 $string['upload_confirm'] = 'Please cross check all the options as this operation can not be rollback.';
 $string['requried_confirm'] = 'Confirmation required';
 $string['select_option'] = '--Please Select-- ';
+$string['coursenotes'] = 'Coruse Notes';
+$string['reengccemail'] = 'Re-engagement CC email';
+$string['reengccemail_help'] = 'Comma separated list of emails';

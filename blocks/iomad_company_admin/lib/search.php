@@ -63,12 +63,18 @@ $userselector = new $classname($name, $options);
 
 // Do the search and output the results.
 $results = $userselector->find_users($search);
+
 $jsonresults = array();
 foreach ($results as $groupname => $users) {
     $groupdata = array('name' => $groupname, 'users' => array());
     foreach ($users as $user) {
         $output = new stdClass;
-        $output->id = $user->id;
+        if($classname =='current_license_user_selector'){
+            $output->id = $user->licenseid;
+        }else{
+            $output->id = $user->id;
+        }
+        
         $output->name = $userselector->output_user($user);
         if (!empty($user->disabled)) {
             $output->disabled = true;

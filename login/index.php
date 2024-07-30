@@ -228,9 +228,11 @@ if ($frm and isset($frm->username)) {                             // Login WITH 
 
         } else if (!empty($user->lang)) {
             // unset previous session language - use user preference instead
-            unset($SESSION->lang);
+            //unset($SESSION->lang);
         }
-
+        if(!empty($SESSION->lang)){
+            $user->lang = $SESSION->lang;
+        }
         if (empty($user->confirmed)) {       // This account was never confirmed
             $PAGE->set_title(get_string("mustconfirm"));
             $PAGE->set_heading($site->fullname);

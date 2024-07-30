@@ -171,6 +171,7 @@ class mod_reengagement_mod_form extends moodleform_mod {
         $truemods = get_fast_modinfo($COURSE->id);
         $mods = array();
         $mods[0] = get_string('nosuppresstarget', 'reengagement');
+        $mods[-1] = get_string('coursecompleted','completion');
         foreach ($truemods->cms as $mod) {
             $mods[$mod->id] = $mod->name;
         }

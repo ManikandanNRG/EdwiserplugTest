@@ -382,15 +382,18 @@ class company_license_users_form extends \moodleform {
                 $licenserecords = $this->currentusers->get_selected_users();
                 $remove = true;
             }
+            
             foreach($licenserecords as $licenserecord) {
                 $licensestounassign[$licenserecord->licenseid] = $licenserecord->licenseid;
             }
-
+            
             // Process incoming unallocations.
             if ($remove || $removeall) {
+               
                 $licenserecord = (array) $this->license;
 
                 if (!empty($licenserecord['program'])) {
+                    
                     $userrecords = array();
                     foreach ($licensestounassign as $licenserecid) {
 
@@ -432,7 +435,7 @@ class company_license_users_form extends \moodleform {
                         $licensestounassign = array();
                     }
                 }
-
+ 
                 if (!empty($licensestounassign)) {
                     foreach ($licensestounassign as $unassignid) {
                         $licensedata = $DB->get_record('companylicense_users' ,array('id' => $unassignid), '*', MUST_EXIST);
@@ -468,6 +471,7 @@ class company_license_users_form extends \moodleform {
                                                                                                             'userid' => $licensedata->userid,
                                                                                                             'other' => $eventother));
                             $event->trigger();
+                        }else{
                         }
                     }
 

@@ -42,4 +42,12 @@ function xmldb_local_akt_install() {
     unassign_capability('local/report_emails:view', $authrole->id); 
     $authrole->name = "Tenant Manager";
     $DB->update_record("role", $authrole);
+    
+    
+     $table = new xmldb_table('company');
+     $field = new xmldb_field('reengccemail', XMLDB_TYPE_TEXT, null, null, null, null);
+
+    if (!$dbman->field_exists($table, $field)) {
+        $dbman->add_field($table, $field);
+    }
 }

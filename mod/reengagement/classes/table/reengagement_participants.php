@@ -461,6 +461,7 @@ class reengagement_participants extends \table_sql implements dynamic_table {
         if ($sort) {
             $sort = 'ORDER BY ' . $sort;
         }
+        global $DB;
 
         $rawdata = $psearch->get_participants($twhere, $tparams, $sort, $this->get_page_start(), $this->get_page_size());
 

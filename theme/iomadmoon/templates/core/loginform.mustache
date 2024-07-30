@@ -246,7 +246,7 @@
         {{/loginidprovtop}}
 
         <div class="rui-login-form">
-
+   {{#hidemanuallogin}}
             <form action="{{loginurl}}" method="post" id="login">
                 <input id="anchor" type="hidden" name="anchor" value="">
                 <script>
@@ -300,6 +300,7 @@
                 {{{logininfobox}}}
                 <button type="submit" class="btn btn-lg btn-primary btn-block mt-3" id="loginbtn">{{#str}}login{{/str}}</button>
             </form>
+               {{/hidemanuallogin}}
         </div><!-- .rui-login-form -->
 
         {{^loginidprovtop}}

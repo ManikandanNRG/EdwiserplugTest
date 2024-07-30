@@ -5981,7 +5981,7 @@ function generate_email_messageid($localpart = null) {
  * @return bool Returns true if mail was sent OK and false if there was an error.
  */
 function email_to_user($user, $from, $subject, $messagetext, $messagehtml = '', $attachment = '', $attachname = '',
-                       $usetrueaddress = true, $replyto = '', $replytoname = '', $wordwrapwidth = 79) {
+                       $usetrueaddress = true, $replyto = '', $replytoname = '', $wordwrapwidth = 79,$cc=[]) {
 
     global $CFG, $PAGE, $SITE;
 
@@ -6057,13 +6057,16 @@ function email_to_user($user, $from, $subject, $messagetext, $messagehtml = '', 
                 $messagehtml);
     }
     $mail = get_mailer();
-
     if (!empty($mail->SMTPDebug)) {
         echo '<pre>' . "\n";
     }
 
     $temprecipients = array();
+    $tempcc =[];
     $tempreplyto = array();
+    if(!empty($cc)){
+        $tempcc = $cc;
+    }
 
     //  IOMAD
     if (!empty($mail->noreplyaddress)) {
@@ -6315,6 +6318,9 @@ function email_to_user($user, $from, $subject, $messagetext, $messagehtml = '', 
             foreach ($tempreplyto as $key => $values) {
                 $tempreplyto[$key][1] = core_text::convert($values[1], 'utf-8', strtolower($charset));
             }
+            foreach ($tempcc as $key => $values) {
+                $tempcc[$key][1] = core_text::convert($values[1], 'utf-8', strtolower($charset));
+            }
         }
     }
 
@@ -6324,7 +6330,10 @@ function email_to_user($user, $from, $subject, $messagetext, $messagehtml = '', 
     foreach ($tempreplyto as $values) {
         $mail->addReplyTo($values[0], $values[1]);
     }
-
+    
+    foreach ($tempcc as $values) {
+        $mail->addCC($values[0], $values[1]);
+    }
     // IOMAD
     $emaildkimselector = $CFG->emaildkimselector;
     if (!empty($mail->emaildkimselector)) {

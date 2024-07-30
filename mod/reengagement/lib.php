@@ -402,6 +402,7 @@ function reengagement_crontask() {
  */
 function reengagement_email_user($reengagement, $inprogress) {
     global $DB, $SITE, $CFG;
+    require_once($CFG->libdir . '/completionlib.php');
     $istotara = false;
     if (file_exists($CFG->dirroot.'/totara')) {
         $istotara = true;
@@ -412,11 +413,24 @@ function reengagement_email_user($reengagement, $inprogress) {
         return true;
     }
     if (!empty($reengagement->suppresstarget)) {
-        $targetcomplete = reengagement_check_target_completion($user->id, $reengagement->suppresstarget);
-        if ($targetcomplete) {
-            debugging('', DEBUG_DEVELOPER) && mtrace('Reengagement modules: User:'.$user->id.
-                      ' has completed target activity:'.$reengagement->suppresstarget.' suppressing email.');
-            return true;
+        if($reengagement->suppresstarget == -1 ){
+            // course completion setting
+            $courseid = $reengagement->courseid;
+            $course = get_course($courseid);
+             $info = new \completion_info($course);
+             if($info->is_course_complete($user->id)){
+                 debugging('', DEBUG_DEVELOPER) && mtrace('Reengagement modules: User:'.$user->id.
+                      ' has completed course:'.$reengagement->suppresstarget.' suppressing email.');
+                return true;
+             }
+            
+        }else{
+            $targetcomplete = reengagement_check_target_completion($user->id, $reengagement->suppresstarget);
+            if ($targetcomplete) {
+                debugging('', DEBUG_DEVELOPER) && mtrace('Reengagement modules: User:'.$user->id.
+                          ' has completed target activity:'.$reengagement->suppresstarget.' suppressing email.');
+                return true;
+            }
         }
     }
     // Where cron isn't run regularly, we could get a glut requests to send email that are either ancient, or too late to be useful.
@@ -529,6 +543,35 @@ function reengagement_email_user($reengagement, $inprogress) {
  * @param object $reengagement database record
  */
 function reengagement_send_notification($userto, $subject, $messageplain, $messagehtml, $reengagement) {
+    global $DB;
+    if($cc = $DB->get_record_sql("select reengccemail from {company} c inner join {company_users} cu on cu.companyid = c.id  where cu.userid = ?", array($userto->id))){
+        // we need to send email
+        $cc = $cc->reengccemail;
+        
+        $cc = explode(",", $cc);
+        $cl = [];
+        foreach ( $cc as $k=>$c){
+            $c = trim($c);
+            if(!filter_var( $c , FILTER_VALIDATE_EMAIL)){
+                unset( $cc[$k] );
+            }else{
+             
+             $cc[$k] = array($c);
+             $cl[] = $c;
+            }
+        }
+        if(!empty($cc)){
+            
+          
+          $send = email_to_user($userto, core_user::get_support_user(), $subject, $messageplain, $messagehtml, $attachment = '', $attachname = '',
+                       $usetrueaddress = true, $replyto = '', $replytoname = '', $wordwrapwidth = 79,$cc) ;
+                       mtrace("Sending email instead of message as we need to send in CC to ". implode(",", $cl)." status: ". ($send?"Sent":"Could not sent"));
+          return $send;
+                       
+                    
+        }
+        
+    }
     $eventdata = new \core\message\message();
     $eventdata->courseid = $reengagement->courseid;
     $eventdata->modulename = 'reengagement';
@@ -543,6 +586,7 @@ function reengagement_send_notification($userto, $subject, $messageplain, $messa
     // Required for messaging framework.
     $eventdata->name = 'mod_reengagement';
     $eventdata->component = 'mod_reengagement';
+    
 
     return message_send($eventdata);
 }

@@ -423,6 +423,25 @@ class iomad_courses_table extends table_sql {
 
     }
     
+      public function col_coursenotes($row) {
+        global $CFG, $DB;
+
+        if($row->courseid){
+            $course = get_course($row->courseid);
+              $handler = \core_course\customfield\course_handler::create();
+            if ($customfields = $handler->export_instance_data($course->id, true)) {
+                $courseinfo['customfields'] = [];
+                foreach ($customfields as $data) {
+                    if($data->get_shortname() == 'notes'){
+                        return  $data->get_value();
+                    }
+                    
+                }
+            }
+        }
+
+    }
+    
     /**
      * Generate the display of the course visibility column.
      * @param object $user the table row being output.

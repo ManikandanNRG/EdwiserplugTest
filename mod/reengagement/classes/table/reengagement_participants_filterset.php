@@ -48,6 +48,7 @@ class reengagement_participants_filterset extends participants_filterset {
     public function get_required_filters(): array {
         return [
             'courseid' => integer_filter::class,
+               'groupid' => integer_filter::class,
         ];
     }
 }

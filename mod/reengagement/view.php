@@ -32,6 +32,7 @@ require_once(dirname(__FILE__) . '/lib.php');
 define('DEFAULT_PAGE_SIZE', 20);
 define('SHOW_ALL_PAGE_SIZE', 5000);
 
+$groupid = optional_param('groupid', 0, PARAM_INT); 
 $id = optional_param('id', 0, PARAM_INT); // Course_module ID.
 $a = optional_param('a', 0, PARAM_INT);  // Reengagement instance ID.
 $page = optional_param('page', 0, PARAM_INT); // Which page to show.
@@ -113,9 +114,17 @@ if ($canedit) {
     $filterset = new \mod_reengagement\table\reengagement_participants_filterset();
     // We pretend the courseid is the cmid, because the core Moodle participants filter doesn't allow adding new filter types.
     $filterset->add_filter(new integer_filter('courseid', filter::JOINTYPE_DEFAULT, [(int) $cm->id]));
+    if($groupid){
+        $filterset->add_filter(new integer_filter('groupid', filter::JOINTYPE_DEFAULT, [(int) $groupid]));
+    }
     $participanttable = new \mod_reengagement\table\reengagement_participants("reengagement-index-participants-{$cm->id}");
 
     echo '<div class="userlist">';
+    $groups = groups_get_all_groups($course->id);
+    foreach ($groups as $gid =>$g){
+        $groups[$gid]= $g->name;
+    }
+  echo $OUTPUT->single_select($PAGE->url, 'groupid', $groups, $groupid, 'Select group to filter');
 
     // Should use this variable so that we don't break stuff every time a variable is added or changed.
     $baseurl = new moodle_url('/mod/reengagement/view.php', array(

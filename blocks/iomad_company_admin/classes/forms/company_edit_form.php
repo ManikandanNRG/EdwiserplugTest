@@ -194,6 +194,9 @@ class company_edit_form extends \company_moodleform {
         $mform->addElement('select', 'emailprofileid', get_string('emailprofileid', 'block_iomad_company_admin'), $profilefields);
         $mform->setDefault('emailprofileid', 0);
         $mform->addHelpButton('emailprofileid', 'emailprofileid', 'block_iomad_company_admin');
+        
+        $mform->addElement('text', 'reengccemail', get_string('reengccemail', 'block_iomad_company_admin'), 'maxlength=200 size=100');
+        $mform->addHelpButton('reengccemail', 'reengccemail', 'block_iomad_company_admin');
 
         /* === end company email notifications === */
          $mform->addElement('header', 'companyadvanced', get_string('companyadvanced', 'block_iomad_company_admin'));
