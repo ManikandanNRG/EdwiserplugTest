@@ -55,7 +55,7 @@ class company_license_expiring_task extends \core\task\scheduled_task {
 
         // Get all of the licenses which are going to expire in the next 30 days and have un-unsed slots.
         $licenses = $DB->get_records_sql("SELECT * FROM {companylicense}
-                                          WHERE used < allocated
+                                          WHERE used < allocation
                                           AND expirydate > :now
                                           AND expirydate < :warn",
                                           ['now' => $runtime,
@@ -65,7 +65,7 @@ class company_license_expiring_task extends \core\task\scheduled_task {
             $company = new company($license->companyid);
             $companyusql = "";
             $companysql = "";
-
+        mtrace("Licence going to expire for company ". $company->name ." license ". $license->name);
             // Only want company managers not parent company managers.
             if ($parentslist = $company->get_parent_companies_recursive()) {
                 $companyusql = " AND u.id NOT IN (
@@ -81,13 +81,19 @@ class company_license_expiring_task extends \core\task\scheduled_task {
                                               AND managertype = 1
                                               $companysql",
                                               ['companyid' => $company->id]);
+            if(!$managers){
+                mtrace("No manager found in company ". $company->name);
+            }
             foreach ($managers as $manager) {
                 if ($user = $DB->get_record('user', ['id' => $manager->userid, 'deleted' => 0, 'suspended' => 0])) {
 
                     $license->expirydate =  date($CFG->iomad_date_format, $license->expirydate);
+                    $license->License_Name = $license->name;
+                    $license->License_Expirydate = $license->expirydate;
+                     $license->License_ID = $license->id;
                     // Passed all checks, send the email.
                     mtrace("Sending license pool expiring email to $user->email");
-                    EmailTemplate::send('licensepoolexpiringq', array('user' => $user, 'license' => $license, 'company' => $company));
+                    EmailTemplate::send('licensepoolexpiring', array('user' => $user, 'license' => $license, 'company' => $company));
                 }
             }
         }

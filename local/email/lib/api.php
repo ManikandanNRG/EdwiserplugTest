@@ -482,6 +482,29 @@ class EmailTemplate {
                 $supportuser->firstname = $fromuser->firstname;
                 $supportuser->customheaders['From'] = $fromuser->email;
             }
+            
+            $cc = [];
+            
+            if (!empty($template->emailcc)) {
+                 $ccuserids = explode(',', $template->emailcc);
+                 foreach ($ccuserids as $ccuserid) {
+                    if ($ccuser = $DB->get_record('user', array('id' => $ccuserid, 'deleted' => 0, 'suspended' => 0))) {
+                        $cc[] = $ccuser->email;
+                    }
+                 }
+            }
+             
+            
+               $ccother= [];
+                if (!empty($template->emailccother)) {
+                    $ccotherusers = explode(',', $template->emailccother);
+                    foreach ($ccotherusers as $ccotheruser) {
+                        if (validate_email($ccotheruser)) {
+                             $ccother[] =  $ccotheruser;
+                        }
+                    }
+                }
+             $cc = $cc + $ccother;
 
             if (!empty($supportuser->customheaders['attachment'])) {
                 $attachment = $supportuser->customheaders['attachment'];
@@ -496,9 +519,10 @@ class EmailTemplate {
                                html_to_text($email->body),
                                $email->body,
                                $attachment,
-                               $email->companyid)) {
+                               $email->companyid,$ccother)) {
                 return false;
             }
+            
             // Send to all of the to user emails.
             if (!empty($template->emailto)) {
                 $touserids = explode(',', $template->emailto);
@@ -517,23 +541,23 @@ class EmailTemplate {
                 }
             }
 
-            // Send to all of the cc user emails.
-            if (!empty($template->emailcc)) {
-                $ccuserids = explode(',', $template->emailcc);
-                foreach ($ccuserids as $ccuserid) {
-                    if ($ccuser = $DB->get_record('user', array('id' => $ccuserid, 'deleted' => 0, 'suspended' => 0))) {
-                        if (!self::email_direct($ccuser->email,
-                                           $supportuser,
-                                           $email->subject,
-                                           html_to_text($email->body),
-                                           $email->body,
-                                           $attachment,
-                                           $email->companyid)) {
-                            return false;
-                        }
-                    }
-                }
-            }
+            // // Send to all of the cc user emails.
+            // if (!empty($template->emailcc)) {
+            //     $ccuserids = explode(',', $template->emailcc);
+            //     foreach ($ccuserids as $ccuserid) {
+            //         if ($ccuser = $DB->get_record('user', array('id' => $ccuserid, 'deleted' => 0, 'suspended' => 0))) {
+            //             if (!self::email_direct($ccuser->email,
+            //                               $supportuser,
+            //                               $email->subject,
+            //                               html_to_text($email->body),
+            //                               $email->body,
+            //                               $attachment,
+            //                               $email->companyid)) {
+            //                 return false;
+            //             }
+            //         }
+            //     }
+            // }
 
             // Deal with the manual to users.
             if (!empty($template->emailtoother)) {
@@ -552,7 +576,7 @@ class EmailTemplate {
                     }
                 }
             }
-
+/*
             // Deal with the manual cc users.
             if (!empty($template->emailccother)) {
                 $ccothers = explode(',', $template->emailccother);
@@ -570,7 +594,7 @@ class EmailTemplate {
                     }
                 }
             }
-
+*/
             // is this a user template?
             if (self::is_user_template($email->templatename)) {
                 // Do we send to managers as well?
@@ -699,15 +723,7 @@ class EmailTemplate {
                 }
             }
         }
-        if (!empty($this->emailccother)) {
-            $ccotherusers = explode(',', $this->emailccother);
-            foreach ($ccotherusers as $ccotheruser) {
-                if (validate_email($ccotheruser)) {
-                    $supportuser->customheaders[] = "Cc:".$ccotheruser;
-                }
-            }
-        }
-
+    
         // Deal with reply user
         if (!empty($this->emailreplyto)) {
             if ($replytouserrec = $DB->get_record('user', array('id' => $this->emailreplyto, 'deleted' => 0, 'suspended' => 0))) {
@@ -810,16 +826,17 @@ class EmailTemplate {
      *
      *
      **/
-    private static function email_direct($emailaddress, $supportuser, $subject, $messagetext, $messagehtml = '', $attachment = null, $companyid = 0) {
+    private static function email_direct($emailaddress, $supportuser, $subject, $messagetext, $messagehtml = '', $attachment = null, $companyid = 0, $cc=[]) {
         global $USER, $CFG;
 
 	if (substr($emailaddress, -8) == '.invalid') {
             debugging("email_to_user:  email domain $emailaddress is invalid! Not sending.");
             return true; // This is not an error.
         }
+     
         $mail = get_mailer();
         company::set_company_mailer($mail, $companyid);
-
+ 
         if (!empty($supportuser->customheaders['From'])) {
             $mail->From = $supportuser->customheaders['From'];
             unset($supportuser->customheaders['Reply-to']);
@@ -844,7 +861,10 @@ class EmailTemplate {
             $mail->Subject = substr('[DIVERTED ' . $emailaddress . '] ' . $subject, 0, 900);
             $mail->addAddress($CFG->divertallemailsto, '');
         }
-
+        // cc
+        foreach ($cc as $c) {
+            $mail->addCC($c);
+        }
         // Set word wrap.
         $mail->WordWrap = 79;
 
@@ -858,13 +878,13 @@ class EmailTemplate {
             $mail->IsHTML(false);
             $mail->Body =  "\n$messagetext\n";
         }
-
         // Do we have an attachment.
         if (!empty($attachment)) {
             require_once($CFG->libdir.'/filelib.php');
             $mimetype = mimeinfo('type', $attachment->filename);
             $mail->addAttachment($attachment->filepath, $attachment->filename, 'base64', $mimetype);
         }
+         mtrace( 'trying ot sent.');
         if (empty($CFG->noemailever)) {
             if(!$mail->send()) {
                 mtrace( 'Message could not be sent.');
@@ -872,7 +892,7 @@ class EmailTemplate {
                 return false;
             }
         }
-
+ mtrace( 'Message  sent.');
         return true;
     }
 

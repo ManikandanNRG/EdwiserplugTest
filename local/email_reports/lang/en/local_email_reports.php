@@ -34,3 +34,4 @@ $string['course_expiry_warning_task'] = 'Email reports - Course expiry warning t
 $string['manager_digest_task'] = 'Email reports - Manager digest task';
 $string['trainingevent_not_selected_task'] = 'Email reports - Training event not selected task';
 $string['licence_expiry_warning_task'] = 'Licence Expiry warning';
+$string['company_license_expiring_task'] = 'Company License expiring email reminder task';

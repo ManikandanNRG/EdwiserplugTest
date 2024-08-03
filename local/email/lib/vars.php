@@ -118,6 +118,7 @@ class EmailVars {
                         'Invoice_Itemized', 'Invoice_FirstName', 'Invoice_LastName', 'Invoice_Company', 'Invoice_Reference',
             // License fields.
                         'License_Length', 'License_Valid',
+             'License_ID','License_Name','License_Expirydate',
             // Sender information fields .
                         'Sender_FirstName', 'Sender_LastName', 'Sender_Email',
             // Activity information fields .
