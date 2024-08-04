@@ -345,7 +345,7 @@ class mod_reengagement_mod_form extends moodleform_mod {
         $duration[] = &$mform->createElement('select', 'period', '', $periods);
         $mform->addGroup($duration, 'duration', get_string('reengagementduration', 'reengagement'), array(' '), false);
         $mform->addHelpButton('duration', 'duration', 'reengagement');
-        $mform->setDefault('periodcount', '1');
+        $mform->setDefault('periodcount', '52');
         $mform->setDefault('period', '604800');
         return array('duration');
     }
