@@ -208,7 +208,15 @@ define('local_edwiserreports/reports/studentengagement', [
                     },
                     width: "4rem"
                 },
-                { data: "lastaccesson", width: "10rem" },
+                { 
+                    data: "lastaccesson",
+                    render: function(data) {
+                        console.log(data);
+                        return data;
+                        // return common.timeFormatter(data);
+                    },
+                    width: "10rem"
+                },
                 { data: "enrolledcourses", width: "4rem" },
                 { data: "inprogresscourses", width: "10rem" },
                 { data: "completedcourses", width: "5rem" },
@@ -274,15 +282,15 @@ define('local_edwiserreports/reports/studentengagement', [
                     'enrolment': filter.enrolment,
                     'search': $(SELECTOR.SEARCH).val(),
                     'start': data.start,
-                    'order': data.order[0]
+                    'order': data.order[0],
+                    'dir': filter.dir
                 }).done(function(response) {
                     common.loader.hide(SELECTOR.PAGE);
                     callback(response);
 
                     // RTL support for arrows
                     setTimeout(function(){
-                        $('.edwiserreports-table .page-item.next a').empty();
-                        $('.edwiserreports-table .page-item.previous a').empty();
+                        
                         var attr = $('html').attr('dir');
                         // For some browsers, `attr` is undefined; for others,
                         // `attr` is false.  Check for both.
@@ -291,6 +299,9 @@ define('local_edwiserreports/reports/studentengagement', [
                             $('.edwiserreports-table .page-item.previous a:before').css({'border-bottom': '6px solid transparent','border-top': '6px solid transparent','border-right':' 10px solid transparent','border-right-color': '#ccc','border-left-width': '0px'});
                         }
                     }, 1000);
+
+                    $('.edwiserreports-table .page-item.next a').empty();
+                    $('.edwiserreports-table .page-item.previous a').empty();
 
                 }).fail(function(ex) {
                     Notification.exception(ex);

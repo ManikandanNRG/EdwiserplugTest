@@ -37,11 +37,15 @@ define('local_edwiserreports/blocks/learnercourseprogress', [
      */
     var chart = null;
 
+    
+
     /**
      * Filter for ajax.
      */
     var filter = {
-        course: 0
+        course: 0,
+        dir: $('html').attr('dir'),
+        rtl: $('html').attr('dir') == 'rtl' ? 1 : 0
     };
 
     /**
@@ -124,7 +128,10 @@ define('local_edwiserreports/blocks/learnercourseprogress', [
         colors: [CFG.getColorTheme()[2]]
     };
 
-    let position = 'right';
+    /**
+     * Legend position.
+     */
+    var position = filter.rtl ? 'left' : 'right';
 
     /**
      * Donut chart default config.
@@ -274,7 +281,13 @@ define('local_edwiserreports/blocks/learnercourseprogress', [
                 return;
             }
             let width = $(SELECTOR.PANEL).find(SELECTOR.GRAPH).width();
+            var attr = $('html').attr('dir');
             let newPosition = width >= 400 ? 'right' : 'bottom';
+            if (attr == 'rtl') {
+                newPosition = width >= 400 ? 'left' : 'bottom';
+            }
+
+
             if (newPosition == position) {
                 return;
             }

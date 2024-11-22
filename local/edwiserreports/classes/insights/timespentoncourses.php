@@ -53,6 +53,7 @@ trait timespentoncourses {
             'startdate' => $startdate,
             'enddate' => $enddate
         );
+
         return $DB->get_field_sql($sql, $params);
     }
 
@@ -215,9 +216,6 @@ trait timespentoncourses {
         return [$currenttimespent, $oldtimespent];
 
     }
-
-
-
 
 
 }

@@ -55,8 +55,7 @@ define('local_edwiserreports/reports/completion', [
         grade: 'all',
         groupname: '',
         cohortname :'',
-        dir: $('html').attr('dir')
-    };
+        dir: $('html').attr('dir')    };
 
     /**
      * Flat picker object.
@@ -116,7 +115,7 @@ define('local_edwiserreports/reports/completion', [
         let dateAlternate = $(SELECTOR.DATEPICKERINPUT).next().val().replace("to", "-"); // d M Y format
 
         
-	// RTL support
+    // RTL support
         // Split string in 2 parts
         let stringarr = dateAlternate.split('-');
         // Formating date for rtl
@@ -223,24 +222,44 @@ define('local_edwiserreports/reports/completion', [
                     {
                         data: "enrolledon",
                         render: function(data) { 
-                            return `<span class="d-none">${data}</span>` +
-                                (data == 0 ? '-' : common.formatDate(new Date(data * 1000), "d MMM yyyy"));
+                            let tempdate = common.formatDate(new Date(data * 1000), "d MMM yyyy");
+                            let rtl = $('html').attr('dir') == 'rtl' ? 1 : 0
+
+                            if(rtl){
+                                tempdate = common.formatDate(new Date(data * 1000), "yyyy MMM d");
+                            }
+                            return `<p class="erp-time-rtl"><span class="d-none">${data}</span>` +
+                                (data == 0 ? '-' : tempdate) + '</p>';
                         },
                         width: "10rem"
                     },
                     {
                         data: "completedon",
                         render: function(data) {
-                            return `<span class="d-none">${data}</span>` +
-                                (data == 0 ? '-' : common.formatDate(new Date(data * 1000), "d MMM yyyy"));
+                            let tempdate = common.formatDate(new Date(data * 1000), "d MMM yyyy");
+                            let rtl = $('html').attr('dir') == 'rtl' ? 1 : 0
+
+                            if(rtl){
+                                tempdate = common.formatDate(new Date(data * 1000), "yyyy MMM d");
+                            }
+                            return `<p class="erp-time-rtl"><span class="d-none">${data}</span>` +
+                                (data == 0 ? '-' : tempdate) + '</p>';
                         },
                         width: "10rem"
                     },
                     {
                         data: "lastaccess",
                         render: function(data) {
-                            return `<span class="d-none">${data}</span>` +
-                                (data == 0 ? never : common.formatDate(new Date(data * 1000), "d MMM yyyy hh:mm TT").substring(0,11) + '<br>' + common.formatDate(new Date(data * 1000), "d MMM yyyy hh:mm TT").substring(11,20));
+
+                            let tempdate = common.formatDate(new Date(data * 1000), "d MMM yyyy hh:mm TT").substring(0,11) + '<br>' + common.formatDate(new Date(data * 1000), "d MMM yyyy hh:mm TT").substring(11,20);
+                            let rtl = $('html').attr('dir') == 'rtl' ? 1 : 0
+
+                            if(rtl){
+                                tempdate = common.formatDate(new Date(data * 1000), "TT mm:hh yyyy MMM d").substring(8, 20) + '<br>' + common.formatDate(new Date(data * 1000), "TT mm:hh yyyy MMM d").substring(0,8);
+                            }
+
+                            return `<p class="erp-time-rtl"><span class="d-none">${data}</span>` +
+                                (data == 0 ? never : tempdate) + '</p>';
                         },
                         width: "10rem"
                     },
@@ -294,6 +313,8 @@ define('local_edwiserreports/reports/completion', [
      * @param {integer} CONTEXTID Current page context id
      */
     function init(CONTEXTID) {
+
+        filter.dir = $('html').attr('dir');
 
         // Show time period in table info.
         common.updateTimeLabel('all');

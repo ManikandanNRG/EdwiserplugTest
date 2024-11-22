@@ -215,9 +215,10 @@ class certificatesblock extends block_base {
      * Get a certificates details for certificate page
      * @param  int    $certid   Certificate id
      * @param  int    $cohortid Cohort id
+     * @param  int    $table    If data is not to be exported and will be shown in browser table
      * @return object           Certifcates details object
      */
-    public function get_issued_users($certid, $cohortid = false, $rtl = 0) {
+    public function get_issued_users($certid, $cohortid = false, $table = 1) {
         global $DB;
 
         $cachekey = "certificates-userslist-" . $certid . "-" . $cohortid;
@@ -248,7 +249,7 @@ class certificatesblock extends block_base {
             $issuedcert = array();
 
             foreach ($issued as $issue) {
-                $issuedcert[] = $this->get_certinfo($course, $issue, $rtl);
+                $issuedcert[] = $this->get_certinfo($course, $issue, $table);
             }
 
             // Set cache for issued certificates.
@@ -265,14 +266,15 @@ class certificatesblock extends block_base {
      * @param  object $issue  stdClass object of issued certificates
      * @return object         Certificate information
      */
-    public function get_certinfo($course, $issue, $rtl = 0) {
+    public function get_certinfo($course, $issue, $table) {
         global $DB;
         $data = optional_param("data", 0, PARAM_RAW);
         $data = json_decode($data);
         $filter = isset($data->filter) ? $data->filter : array();
 
         // $filter = json_decode($filter);
-        $rtl = $rtl ? $rtl : (isset($filter->dir) && $filter->dir == 'rtl' ? 1 : 0);
+        // $rtl = $rtl ? $rtl : (isset($filter->dir) && $filter->dir == 'rtl' ? 1 : 0);
+        $rtl = get_string('thisdirection', 'langconfig') == 'rtl' ? 1 : 0;
 
         $enrolsql = "SELECT ue.id, ue.timemodified
             FROM {user_enrolments} ue
@@ -295,6 +297,10 @@ class certificatesblock extends block_base {
         $progressper = 0;
         if ($enrolment) {
             $enrolmentdate = $rtl ? '<div style="direction:ltr;">' . date("y M d", $enrolment->timemodified) . '</div>' : date("d M y", $enrolment->timemodified);
+            if(!$table){
+                $enrolmentdate = $rtl ? date("y M d", $enrolment->timemodified) : date("d M y", $enrolment->timemodified);
+            }
+            
             $completion = \local_edwiserreports\utility::get_course_completion_info($course, $user->id);
 
             if (isset($completion["progresspercentage"])) {
@@ -327,6 +333,11 @@ class certificatesblock extends block_base {
         $certinfo->username = fullname($user);
         $certinfo->email = $user->email;
         $certinfo->issuedate = $rtl ? '<div style="direction:ltr;">' . date("y M d", $issue->timecreated) . '</div>' : date("d M y", $issue->timecreated);
+        
+        if(!$table){
+            $certinfo->issuedate = $rtl ? date("y M d", $issue->timecreated) : date("d M y", $issue->timecreated);
+        }
+
         $certinfo->dateenrolled = $enrolmentdate;
         $certinfo->grade = $gradeval . '%';
         $certinfo->courseprogress = $courseprogresshtml;
@@ -371,7 +382,9 @@ class certificatesblock extends block_base {
      */
     public static function get_exportable_data_block($filter, $filterdata = true) {
         $filter = json_decode($filter);
-        $rtl = isset($filter->dir) && $filter->dir == 'rtl' ? 1 : 0;
+        // $rtl = isset($filter->dir) && $filter->dir == 'rtl' ? 1 : 0;
+        $rtl = get_string('thisdirection', 'langconfig') == 'rtl' ? 1 : 0;
+
 
         if ($filterdata) {
             $cohort = optional_param('cohortid', 0, PARAM_INT);
@@ -404,7 +417,8 @@ class certificatesblock extends block_base {
         $cohortid = optional_param("cohortid", 0, PARAM_INT);
         $filter = optional_param("filter", 0, PARAM_TEXT);
         $filter = json_decode($filter);
-        $rtl = isset($filter->dir) && $filter->dir == 'rtl' ? 1 : 0;
+        // $rtl = isset($filter->dir) && $filter->dir == 'rtl' ? 1 : 0;
+        $rtl = get_string('thisdirection', 'langconfig') == 'rtl' ? 1 : 0;
 
         $certid = $filter->certificateid;
 
@@ -413,7 +427,7 @@ class certificatesblock extends block_base {
         }
 
         $blockobj = new self();
-        $record = $blockobj->get_issued_users($certid, $cohortid, $rtl);
+        $record = $blockobj->get_issued_users($certid, $cohortid, 0);
 
         $users = array();
 

@@ -81,7 +81,8 @@ define('local_edwiserreports/reports/courseactivitiessummary', [
         enrolment: 'all',
         sectionname: '',
         activityname: '',
-        dir: $('html').attr('dir')
+        dir: $('html').attr('dir'),
+        rtl: $('html').attr('dir') == 'rtl' ? 1 : 0
     };
 
     /**
@@ -202,14 +203,14 @@ define('local_edwiserreports/reports/courseactivitiessummary', [
                         {
                             'data': 'totaltimespent',
                             render: function(data) {
-                                return common.timeFormatter(data);
+                                return common.timeFormatter(data, [], filter.rtl);
                             },
                             width: "10rem"
                         },
                         {
                             'data': 'averagetimespent',
                             render: function(data) {
-                                return common.timeFormatter(data);
+                                return common.timeFormatter(data, [], filter.rtl);
                             },
                             width: "10rem"
                         },
@@ -322,6 +323,7 @@ define('local_edwiserreports/reports/courseactivitiessummary', [
     function init() {
 
         filter = JSON.parse($(SELECTOR.FORMFILTER).val());
+        filter.rtl = $('html').attr('dir') == 'rtl' ? 1 : 0;
 
         // Show time period in table info.
         common.updateTimeLabel('all');

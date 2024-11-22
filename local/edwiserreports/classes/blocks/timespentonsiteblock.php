@@ -180,6 +180,10 @@ class timespentonsiteblock extends block_base {
             $count++;
         }
 
+
+
+
+
         $this->averagetimespent += $totaltimespent == 0 ? 0 : round($totaltimespent / $count);
         $this->totaltimespent += $totaltimespent;
 
@@ -216,6 +220,7 @@ class timespentonsiteblock extends block_base {
         global $DB;
         $totaltimespent = 0;
         $count = 0;
+
         foreach ($data['timespent'] as $timespent) {
             $totaltimespent += $timespent;
             $count ++;
@@ -235,6 +240,15 @@ class timespentonsiteblock extends block_base {
                 ]]
             ]
         ];
+
+
+
+
+        // Setting data
+        $this->averagetimespent = $averagetimespent;
+        $this->totaltimespent = $totaltimespent;
+
+
 
         $userid = $filter->student;
 
@@ -258,7 +272,9 @@ class timespentonsiteblock extends block_base {
 
         $oldtimespent = $DB->get_field_sql($sql, $params);
         $oldaveragetimespent = $oldtimespent == 0 ? 0 : round($oldtimespent / $count);
+
         $insight = $this->calculate_insight_difference($insight, $averagetimespent, $oldaveragetimespent, 2);
+
         return $insight;
     }
 
@@ -320,12 +336,21 @@ class timespentonsiteblock extends block_base {
                         GROUP BY al.datecreated";
                 break;
         }
+
+
+
+
         $logs = $DB->get_records_sql($sql, $params);
 
+
+
         foreach ($logs as $log) {
+
             if (!isset($this->dates[$log->datecreated])) {
                 continue;
             }
+
+
             $this->dates[$log->datecreated] = $log->timespent;
         }
 
@@ -334,10 +359,13 @@ class timespentonsiteblock extends block_base {
             'dates' => array_keys($this->dates)
         ];
 
+
         // If insight variable is true then only calculate insight.
         if ($insight) {
             $response['insight'] = $this->calculate_insight($filter, $coursetable, $response, $oldstartdate, $oldenddate);
+
         }
+
 
         utility::drop_temp_table($coursetable);
         // Set respose in cache.
@@ -368,6 +396,7 @@ class timespentonsiteblock extends block_base {
         if (count($users) < 1) {
             return;
         }
+
         // Temporary course table.
         $userstable = utility::create_temp_table('tmp_tsos_c', array_keys($users));
 
@@ -426,7 +455,6 @@ class timespentonsiteblock extends block_base {
         $this->generate_labels($timeperiod);
 
         if (!$response = $this->sessioncache->get($cachekey)) {
-
             $params = [
                 'startdate' => floor($this->startdate / 86400),
                 'enddate' => floor($this->enddate / 86400)
@@ -439,6 +467,7 @@ class timespentonsiteblock extends block_base {
             );
 
             $courses = $this->get_courses_of_user($this->get_current_user());
+
             if (!has_capability('moodle/site:accessallgroups', context_system::instance())) {
                 // Get all courses where groupmode is set as 1
                 // Then remove those courses from users course array.
@@ -459,9 +488,9 @@ class timespentonsiteblock extends block_base {
                     $oldenddate
                 );
 
-
-                $this->totaltimespent = 0;
-                $this->averagetimespent = 0;
+                // Commented this code in v 2.3.0
+                // $this->totaltimespent = 0;
+                // $this->averagetimespent = 0;
                 $this->oldaveragetimespent = 0;
                 foreach ($restrictedcourses as $course) {
                     $this->get_course_data(
@@ -473,6 +502,8 @@ class timespentonsiteblock extends block_base {
                         $oldenddate
                     );
                 }
+
+
                 $response = [
                     'timespent' => array_values($this->dates),
                     'dates' => array_keys($this->dates)
@@ -508,11 +539,13 @@ class timespentonsiteblock extends block_base {
                     $oldenddate
                 );
             }
-
             return $response;
 
             $this->sessioncache->set($cachekey, $response);
         }
+
+
+
         return $response;
     }
 

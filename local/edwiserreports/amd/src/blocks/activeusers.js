@@ -50,6 +50,14 @@ define('local_edwiserreports/blocks/activeusers', [
     var timer = null;
 
     /**
+     * Filters
+     */
+    // var filter = {
+    //     daterange: null,
+    //     dir: $('html').attr('dir')
+    // };
+
+    /**
      * Modal data table array.
      */
     var modalDataTable = [];
@@ -62,6 +70,7 @@ define('local_edwiserreports/blocks/activeusers', [
         RESETTIME: '#activeusersblock #updated-time > span.minute',
         REFRESH: '#activeusersblock .refresh',
         CONTEXT: '[data-contextid]',
+        FORMFILTER: "#activeusers .download-links input[name='filter']",
         MODALROOT: '.siteoverview-modal-tables',
         MODALLINK: '.siteoverview-modal-tables .nav .nav-link',
         MODALTAB: '.siteoverview-modal-tables .tabs .tab'
@@ -327,7 +336,11 @@ define('local_edwiserreports/blocks/activeusers', [
             filter = date;
 
             // Set export filter to download link.
-            $(SELECTOR.PANEL).find('.download-links [name="filter"]').val(filter);
+            // $(SELECTOR.PANEL).find('.download-links [name="filter"]').val(filter);
+            // $(SELECTOR.FORMFILTER).val(JSON.stringify(filter));
+            $(SELECTOR.FORMFILTER).val(filter);
+            $("#userfilter .download-links input[name='filter']").val(filter);
+            
             getActiveUsersBlockData();
         });
 
@@ -387,6 +400,8 @@ define('local_edwiserreports/blocks/activeusers', [
 
             activeUsersData.graph.data = response.data;
             activeUsersData.graph.labels = response.dates.map(date => date * 86400000);
+
+
             common.insight(SELECTOR.PANEL + ' .insight', response.insight);
         }).fail(function(error) {
             Notification.exception(error);
@@ -470,6 +485,12 @@ define('local_edwiserreports/blocks/activeusers', [
 
         // Assigning current date.
         filter = currentDate;
+
+        console.log('filter::::');
+        console.log(filter);
+
+        $(SELECTOR.FORMFILTER).val(filter);
+        // $("#userfilter .download-links input[name='filter']").val(JSON.stringify(filter));
 
         /* Custom Dropdown hide and show */
         activeUsersData = CFG.getActiveUsersBlock();

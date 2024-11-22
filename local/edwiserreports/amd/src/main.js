@@ -178,9 +178,26 @@ define([
             startDay = startDay < 10 ? '0' + startDay : startDay;
             let endDay = enddate.getDate();
             endDay = endDay < 10 ? '0' + endDay : endDay;
-            $(SELECTOR.DATESELECTED).html('<div style="display:flex;"><div>' + `
-            ${startDay} ${startdate.toLocaleString('default', { month: 'long' })} ${startdate.getFullYear()}` + '</div> - <div>' +
-            `${endDay} ${enddate.toLocaleString('default', { month: 'long' })} ${enddate.getFullYear()}` + '</div></div>');
+
+            let customdate = `${startDay} ${startdate.toLocaleString('default', { month: 'long' })} ${startdate.getFullYear()}` + ' - ' +
+            `${endDay} ${enddate.toLocaleString('default', { month: 'long' })} ${enddate.getFullYear()}`;
+            // RTL support
+            let dirattr = $('html').attr('dir');
+            // Formating date for rtl
+            if(dirattr == 'rtl'){
+                // format for rtl : yyyy mm dd
+
+                startdate = startdate.getFullYear() + ' ' + startdate.toLocaleString('default', { month: 'long' }) + ' ' + startDay;
+                enddate = enddate.getFullYear() + ' ' + enddate.toLocaleString('default', { month: 'long' }) + ' ' + endDay;
+                customdate = enddate + '-' + startdate;
+                
+
+                // Making direction ltr for date selector and aligning text to right
+                $(SELECTOR.DATE).css({'direction':'ltr','text-align': 'right'});
+                $(SELECTOR.DATEPICKERINPUT).css({'direction':'ltr','text-align': 'right'});
+            }
+
+            $(SELECTOR.DATESELECTED).html(customdate);
 
             // $(SELECTOR.DATESELECTED).html('<div style="display:flex;"><div>' + `${startDay} ${startdate.toLocaleString('default', { month: 'long' })} ${startdate.getFullYear()}` + '</div> - <div>' +
             // `${endDay} ${enddate.toLocaleString('default', { month: 'long' })} ${enddate.getFullYear()}` + '</div></div>');
@@ -211,7 +228,27 @@ define([
     function customDateSelected() {
         let date = $(SELECTOR.DATEPICKERINPUT).val(); // Y-m-d format
         let dateAlternate = $(SELECTOR.DATEPICKERINPUT).next().val().replace("to", "-"); // d M Y format
-        $(SELECTOR.DATEPICKERINPUT).next().val(dateAlternate);
+
+        // RTL support
+        let dirattr = $('html').attr('dir');
+        // Split string in 2 parts
+        let stringarr = dateAlternate.split('-');
+        // Formating date for rtl
+        if(dirattr == 'rtl'){
+            // format for rtl : yyyy mm dd
+            let startdate = stringarr[0].split(' ');
+            let enddate = stringarr[1].split(' ');
+
+            startdate = startdate[2] + ' ' + startdate[1] + ' ' + startdate[0];
+            enddate = enddate[3] + ' ' + enddate[2] + ' ' + enddate[1];
+            dateAlternate = enddate + '-' + startdate;
+
+            // Making direction ltr for date selector and aligning text to right
+            $(SELECTOR.DATE).css({'direction':'ltr','text-align': 'right'});
+            $(SELECTOR.DATEPICKERINPUT).css({'direction':'ltr','text-align': 'right'});
+        }
+
+        $(SELECTOR.DATEPICKERINPUT).next().val($.trim(dateAlternate));
 
         /* If correct date is not selected then return false */
         if (!date.includes(" to ")) {

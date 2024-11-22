@@ -627,8 +627,9 @@ class activeusersblock extends block_base {
         $blockobj = new self();
         $blockobj->graphajax = false;
         $formfilter = optional_param("filter", 0, PARAM_TEXT);
-        $formfilter = json_decode($formfilter);
-        $rtl = isset($formfilter->dir) && $formfilter->dir == 'rtl' ? 1 : 0;
+        // $formfilter = json_decode($formfilter);
+        // $rtl = isset($formfilter->dir) && $formfilter->dir == 'rtl' ? 1 : 0;
+        $rtl = get_string('thisdirection', 'langconfig') == 'rtl' ? 1 : 0;
 
         $cohortid = optional_param('cohortid', 0, PARAM_INT);
 
@@ -644,7 +645,7 @@ class activeusersblock extends block_base {
         $export[] = self::get_header_report($rtl);
 
         foreach ($dates as $key => $date) {
-            $label = date("d F Y", $date * 86400);
+            $label = $rtl ? date("Y F d", $date * 86400) : date("d F Y", $date * 86400);
 
             $activeusers = $rtl ? array_reverse(self::get_usersdata($label, $date, "activeusers", $cohortid)) : self::get_usersdata($label, $date, "activeusers", $cohortid);
             $enrolments = $rtl ? array_reverse(self::get_usersdata($label, $date, "enrolments", $cohortid)) : self::get_usersdata($label, $date, "enrolments", $cohortid);

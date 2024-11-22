@@ -46,11 +46,20 @@ define('local_edwiserreports/blocks/customreport', [
                     action: 'get_customreports_data_ajax',
                     secret: M.local_edwiserreports.secret,
                     lang: $('html').attr('lang'),
-                    data: params
+                    data: params,
+                    filter: JSON.stringify(filter)
                 }
             });
         }
     };
+
+    /**
+     * Filter object.
+     */
+    var filter = {
+        dir: $('html').attr('dir')
+    };
+
 
     /**
      * Initialise custom report block
@@ -60,14 +69,13 @@ define('local_edwiserreports/blocks/customreport', [
     function init(id, params) {
         var tableId = `#${id} table.customreportdata`;
         var searchTable = `#${id}  .table-search-input input`;
-
         // Calling common blocks editing function to show change capability popup
         common.setupBlockEditing('.erp-custom-edit-settings');
-
         common.loader.show($(tableId).closest('[id^="customreportsblock"]'));
         PROMISE.GET_DATA(params)
             .done(function(response) {
                 if (response.success) {
+                    // let tableId = `#${id} table.customreportdata`;
                     var data = JSON.parse(response.data);
                     var table = $(tableId).DataTable({
                         columns: data.columns,
@@ -95,6 +103,9 @@ define('local_edwiserreports/blocks/customreport', [
                         table.search(this.value).draw();
                     });
                 }
+                // uodating form filter.
+                var parentid = $(tableId).closest('[id^="customreportsblock"]').attr('id');
+                $('#' + parentid + ' .download-links [name="filter"]').val(JSON.stringify(filter));
 
                 // RTL support for arrows
                 setTimeout(function(){

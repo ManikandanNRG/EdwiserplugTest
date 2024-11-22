@@ -318,7 +318,7 @@ $string['dateofenrol'] = 'Date d\'inscription';
 $string['grade'] = 'grade';
 $string['courseprogress'] = 'Progrès du cours';
 $string['notenrolled'] = 'Utilisateur non inscrit';
-$string['searchcertificates'] = 'par certificats';
+$string['searchcertificates'] = 'par l\'apprenant';
 
 /* Site Access Block*/
 $string['sun'] = 'SOLEIL';

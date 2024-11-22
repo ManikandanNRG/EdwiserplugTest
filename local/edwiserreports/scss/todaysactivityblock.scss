@@ -54,6 +54,11 @@
             }
         }
     }
+
+     html[dir=rtl] .learner-dropdown{
+        right: -50px;
+    }
+
 }
 
 @media (min-width: 768px) and (max-width: 830px) {

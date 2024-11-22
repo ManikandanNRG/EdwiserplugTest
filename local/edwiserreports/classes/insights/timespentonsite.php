@@ -52,6 +52,7 @@ trait timespentonsite {
             'enddate' => $enddate,
             'userid' => $userid
         );
+
         $time = $DB->get_field_sql($sql, $params);
         return $time > 0 ? $time : 0;
     }

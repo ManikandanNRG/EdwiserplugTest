@@ -24,7 +24,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_edwiserreports';
-$plugin->release   = '2.3.0';
-$plugin->version   = 2023041301;
+$plugin->release   = '2.4.0';
+$plugin->version   = 2023080401; // YYYYMMDDXX
 $plugin->requires  = 2021051700;
 $plugin->maturity  = MATURITY_STABLE;

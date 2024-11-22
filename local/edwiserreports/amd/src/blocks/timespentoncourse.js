@@ -84,7 +84,8 @@ define('local_edwiserreports/blocks/timespentoncourse', [
         course: 0,
         group: 0,
         student: 0,
-        dir: $('html').attr('dir')
+        dir: $('html').attr('dir'),
+        rtl: $('html').attr('dir') == 'rtl' ? 1 : 0
     };
 
     /**
@@ -337,10 +338,10 @@ define('local_edwiserreports/blocks/timespentoncourse', [
                 response.insight.insight.value = common.timeFormatter(response.insight.insight.value, {
                     dataPointIndex: 0,
                     short: true
-                }).replaceAll(',', ' ');
+                }, filter.rtl).replaceAll(',', ' ');
                 response.insight.details.data[0].value = common.timeFormatter(response.insight.details.data[0].value, {
                     dataPointIndex: 0
-                });
+                }, filter.rtl);
                 common.insight(SELECTOR.INSIGHT, response.insight);
                 renderGraph($(SELECTOR.PANEL).find(SELECTOR.GRAPH), data);
             }).fail(function(exception) {

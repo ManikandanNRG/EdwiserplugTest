@@ -191,18 +191,12 @@ define([
             if (typeof attr !== 'undefined' && attr !== false && attr == 'rtl') {
                 $('.dropdown-item.custom').css({'direction':'ltr','text-align': 'right'});
 
-                $('.insight-wrapper .fa-arrow-left').removeClass("fa-arrow-left").addClass("fa-arrow-right rtl-support");
+                $('.insight-wrapper .fa-arrow-left:not(.rtl-support)').removeClass("fa-arrow-left").addClass("fa-arrow-right rtl-support");
                 $('.insight-wrapper .fa-arrow-right:not(.rtl-support)').removeClass("fa-arrow-right").addClass("fa-arrow-left rtl-support");
             }
-        }, 1000);
-
-        setTimeout(function(){
-            // removing datatbles next previous blank as it can not be done by thier attributes
             $('.edwiserreports-table .page-item.next a').empty();
             $('.edwiserreports-table .page-item.previous a').empty();
-
-        }, 2000);
-
+        }, 1000);
     }
 
     /**
@@ -511,20 +505,21 @@ define([
      * @param {Object} opts Options
      * @returns {String}
      */
-    function timeFormatter(seconds, opts, rtl=0) {
+    function timeFormatter(seconds, opts) {
         seconds = Number(seconds);
         var h = Math.floor(seconds / 3600);
         var m = Math.floor(seconds % 3600 / 60);
         var s = Math.floor(seconds % 3600 % 60);
 
-        console.log('RTL ::: ');
-        console.log(rtl);
+        rtl = $('html').attr('dir') == 'rtl' ? 1 : 0;
+
 
         if (typeof opts == 'object' && opts.dataPointIndex !== undefined && opts.dataPointIndex !== -1) {
             var time = [];
             var short = opts.short !== undefined && opts.short;
 
             if(rtl == 1){
+
                 if (s > 0) {
                     if (short) {
                         time.push(M.util.get_string('secondshort', 'local_edwiserreports')+ " " + s  );
@@ -535,9 +530,9 @@ define([
                 
                 if (m > 0) {
                     if (short) {
-                        time.push( M.util.get_string('minuteshort', 'local_edwiserreports')+ " " + m);
+                        time.push(M.util.get_string('minuteshort', 'local_edwiserreports')+ " " + m);
                     } else {
-                        time.push( M.util.get_string(m == 1 ? 'minute' : 'minutes', 'local_edwiserreports')+ + " " + m);
+                        time.push(M.util.get_string(m == 1 ? 'minute' : 'minutes', 'local_edwiserreports')+ " " + m);
                     }
                 }
                 if (h > 0) {
@@ -549,6 +544,7 @@ define([
                 }
                 
             } else {
+
                 if (h > 0) {
                     if (short) {
                         time.push(h + " " + M.util.get_string('hourshort', 'local_edwiserreports'));
@@ -571,13 +567,15 @@ define([
                     }
                 }
             }
+
             if (time.length == 0) {
                 time.push(0);
             }
 
             return time.join(', ');
         }
-        return timePlainFormat(h, m, s);
+
+        return rtl == 1 ? timePlainFormat(s, m, h) : timePlainFormat(h, m, s);
     }
 
     /**

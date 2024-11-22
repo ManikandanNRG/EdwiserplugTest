@@ -1,3 +1,11 @@
+# v 2.4.0
+
+### Features
+* Added compatibility to Moodle 4.2 
+* Added support to Remui theme v2.
+
+### Fixes
+* Solved courseactivities block missing data issue.
 
 # v 2.3.0
 
