@@ -53,11 +53,8 @@ class reengagement_search extends participants_search {
         $sql['outerjoins'] .= 'LEFT JOIN {reengagement_inprogress} rip ON rip.userid = u.id LEFT JOIN {course_modules} cm  on cm.instance = rip.reengagement and cm.module = (select id from {modules} where name="reengagement") LEFT JOIN ( select g.id, gm.userid, g.courseid from {groups_members} gm INNER JOIN {groups} g where g.id = gm.groupid and g.courseid = '. $this->course->id.' ) gt on gt.userid= u.id';
         $sql['outerselect'] .= ', rip.completiontime AS completiontime, rip.emailtime AS emailtime, '
             . 'rip.emailsent AS emailsent, rip.completed AS completed';
-            if(empty($sql['outerwhere'])) {
-                        $sql['outerwhere'] = ' where  cm.id = '.$this->context->instanceid;
-                    }else{
-                          $sql['outerwhere'] =  ' where  cm.id = '.$this->context->instanceid;
-                    }
+            
+         
             if ($this->filterset->has_filter('groupid')) {
                $groupid = $this->filterset->get_filter('groupid')->get_filter_values();
                 $groupid = array_pop($groupid);
