@@ -290,17 +290,26 @@ define('local_edwiserreports/blocks/learnertimespentonsite', [
         }
 
         // RTL support
-        // Split string in 2 parts
-        let stringarr = dateAlternate.split('-');
+        
         // Formating date for rtl
         if(filter.dir == 'rtl'){
-            // format for rtl : yyyy mm dd
-            let startdate = stringarr[0].split(' ');
-            let enddate = stringarr[1].split(' ');
+            // Split string in 2 parts
+            if(dateAlternate.includes('to')){
+                let stringarr = dateAlternate.split('to');
+                // format for rtl : yyyy mm dd
+                let startdate = stringarr[0].split('/');
+                let enddate = stringarr[1].split('/');
 
-            startdate = startdate[2] + ' ' + startdate[1] + ' ' + startdate[0];
-            enddate = enddate[3] + ' ' + enddate[2] + ' ' + enddate[1];
-            dateAlternate = enddate + '-' + startdate;
+                startdate = startdate[2] + '/' + startdate[1] + '/' + startdate[0];
+                enddate = enddate[2] + '/' + enddate[1] + '/' + enddate[0];
+                dateAlternate = enddate + '-' + startdate;
+            } else{
+                // format for rtl : yyyy mm dd
+                let startdate = dateAlternate.split('/');
+
+                startdate = startdate[2] + '/' + startdate[1] + '/' + startdate[0];
+                dateAlternate = startdate;
+            }
 
             // Making direction ltr for date selector and aligning text to right
             $(SELECTOR.DATE).css({'direction':'ltr','text-align': 'right'});

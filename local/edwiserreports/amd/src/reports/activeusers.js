@@ -46,6 +46,7 @@ define('local_edwiserreports/reports/activeusers', [
         TABLE: "#activeusers .table",
         DOWNLOADCOHORTID: ".download-links input[name='cohortid']",
         DOWNLOADFILTER: ".download-links input[name='filter']",
+        FORMFILTER: "#activeusers .download-links input[name='filter']",
         MODALTRIGGER: "#activeusers .table a",
         DATE: '.edwiserreports-calendar',
         DATEMENU: '.edwiserreports-calendar + .dropdown-menu',
@@ -58,6 +59,15 @@ define('local_edwiserreports/reports/activeusers', [
      * Filter
      */
     var filter = 'last7days';
+    // var filter = {
+    //     daterange: 'last7days',
+    //     dir: $('html').attr('dir')
+    // };
+
+    /**
+     * Datatable object.
+     */
+    var direction = $('html').attr('dir');
 
     /**
      * Datatable object.
@@ -84,9 +94,11 @@ define('local_edwiserreports/reports/activeusers', [
             var action = $(this).data("action");
             var modalFilter = $(this).data("filter");
             var ModalRoot = null;
+            var rtl = $('html').attr('dir') == 'rtl' ? 1 : 0;
+
 
             // eslint-disable-next-line no-eval
-            var titleDate = common.formatDate(new Date(eval(modalFilter * 86400 * 1000)), "d MMM yyyy");
+            var titleDate = rtl ? common.formatDate(new Date(eval(modalFilter * 86400 * 1000)), "yyyy MMM d") : common.formatDate(new Date(eval(modalFilter * 86400 * 1000)), "d MMM yyyy");
             title = M.util.get_string(`${action}modaltitle`, V.component, {
                 "date": titleDate
             });
@@ -174,6 +186,26 @@ define('local_edwiserreports/reports/activeusers', [
     function selectedCustomDate() {
         let date = $(SELECTOR.DATEPICKERINPUT).val(); // Y-m-d format
         let dateAlternate = $(SELECTOR.DATEPICKERINPUT).next().val().replace("to", "-"); // d M Y format
+
+        // RTL support
+        // Split string in 2 parts
+        let stringarr = dateAlternate.split('-');
+        // Formating date for rtl
+        if(direction == 'rtl'){
+            // format for rtl : yyyy mm dd
+            let startdate = stringarr[0].split(' ');
+            let enddate = stringarr[1].split(' ');
+
+            startdate = startdate[2] + ' ' + startdate[1] + ' ' + startdate[0];
+            enddate = enddate[3] + ' ' + enddate[2] + ' ' + enddate[1];
+            dateAlternate = enddate + '-' + startdate;
+
+            // Making direction ltr for date selector and aligning text to right
+            $(SELECTOR.DATE).css({'direction':'ltr','text-align': 'right'});
+            $(SELECTOR.DATEPICKERINPUT).css({'direction':'ltr','text-align': 'right'});
+        }
+
+
         $(SELECTOR.DATEPICKERINPUT).next().val(dateAlternate);
 
         /* If correct date is not selected then return false */
@@ -200,7 +232,8 @@ define('local_edwiserreports/reports/activeusers', [
      * Create Active Users Table.
      */
     function createActiveUsersTable() {
-        $(SELECTOR.DOWNLOADFILTER).val(filter);
+        $(SELECTOR.FORMFILTER).val(filter);
+        // $(SELECTOR.FORMFILTER).val(JSON.stringify(filter));
         $(SELECTOR.DOWNLOADCOHORTID).val($(SELECTOR.COHORT).val());
 
         // Show loader.
@@ -219,10 +252,11 @@ define('local_edwiserreports/reports/activeusers', [
         }).done(function(response) {
             var ActiveUsers = [];
             response = JSON.parse(response);
+            var rtl = $('html').attr('dir') == 'rtl' ? 1 : 0;
 
             $.each(response.dates, function(idx, val) {
                 ActiveUsers[idx] = {
-                    date: common.formatDate(new Date(eval(val * 86400 * 1000)), "d MMM yyyy"),
+                    date: rtl ? '<div style="direction:ltr;">' + common.formatDate(new Date(eval(val * 86400 * 1000)), "yyyy MMM d") + '</div>' : common.formatDate(new Date(eval(val * 86400 * 1000)), "d MMM yyyy"),
                     filter: response.dates[idx],
                     activeusers: response.data.activeUsers[idx],
                     courseenrolment: response.data.enrolments[idx],

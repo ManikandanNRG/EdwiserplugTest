@@ -76,7 +76,8 @@ define('local_edwiserreports/reports/allcoursessummary', [
         coursegroup: 0,
         exclude: [],
         enrolment: 'all',
-        dir: $('html').attr('dir')
+        dir: $('html').attr('dir'),
+        rtl: $('html').attr('dir') == 'rtl' ? 1 : 0
     };
 
     /**
@@ -213,14 +214,14 @@ define('local_edwiserreports/reports/allcoursessummary', [
                         {
                             data: "totaltimespent",
                             render: function(data) {
-                                return common.timeFormatter(data);
+                                return common.timeFormatter(data, [], filter.rtl);
                             },
                             width: "10rem"
                         },
                         {
                             data: "avgtimespent",
                             render: function(data) {
-                                return common.timeFormatter(data);
+                                return common.timeFormatter(data, [], filter.rtl);
                             },
                             width: "10rem"
                         }

@@ -18,6 +18,7 @@
             .card-editing {
                 .fa {
                     transition: all 0.3s ease-in-out;
+                    transform: unset;
                     @media (max-width: 767px) {
                         &.fa-arrow-right {
                             transform: rotate(90deg);

@@ -1,5 +1,5 @@
-name: reports-development-actions
-run-name: Development server deployment
+name: edwiserreports-dev-actions
+run-name: Edwiser Reports Dev Deployment
 on: [push]
 jobs:
   deploy:
@@ -13,4 +13,4 @@ jobs:
       - run: eval `ssh-agent -s` && ssh-add ~/.ssh/id_rsa
       - run: ssh-keyscan "${{ vars.DEV_SITE_ADDRESS }}" >> ~/.ssh/known_hosts
       - run: which rsync || (apt update -y && apt install rsync -y)
-      - run: rsync -rvz --delete --no-perms --no-group --no-owner --ignore-missing-args --rsh='ssh ubuntu@"${{ vars.DEV_SITE_ADDRESS }}" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null' . :"${{ vars.MOODLE_41_DIRECTORY }}"
+      - run: rsync -rvz --delete --no-perms --exclude=".github" --exclude="vscode.code-workspace" --rsync-path="sudo rsync" --chown=dev-reports:www-data --ignore-missing-args --rsh='ssh ubuntu@"${{ vars.DEV_SITE_ADDRESS }}" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null' . :"${{ vars.MOODLE_41_DIRECTORY }}"

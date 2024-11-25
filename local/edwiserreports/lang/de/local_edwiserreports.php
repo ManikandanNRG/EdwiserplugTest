@@ -319,7 +319,7 @@ $string['dateofenrol'] = 'Datum der Einschreibung';
 $string['grade'] = 'Klasse';
 $string['courseprogress'] = 'Kurs Fortschritt';
 $string['notenrolled'] = 'Benutzer nicht eingeschrieben';
-$string['searchcertificates'] = 'nach Zertifikaten';
+$string['searchcertificates'] = 'door leerling';
 
 /* Site Access Block*/
 $string['sun'] = 'SONNE';

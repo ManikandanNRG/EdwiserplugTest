@@ -75,7 +75,8 @@ define('local_edwiserreports/reports/learnercourseactivities', [
         module: 'all',
         completion: 'all',
         enrolment: 'all',
-        dir: $('html').attr('dir')
+        dir: $('html').attr('dir'),
+        rtl: $('html').attr('dir') == 'rtl' ? 1 : 0
     };
 
     /**
@@ -144,9 +145,11 @@ define('local_edwiserreports/reports/learnercourseactivities', [
         common.loader.show(SELECTOR.PAGE);
        
         setTimeout(function() {
+            let rtl = $('html').attr('dir') == 'rtl' ? 1 : 0;
+
             lastaccess = $('.learner-course-activties-lastaccess').data('date');
             // M.util.get_string('tableinfo', 'local_edwiserreports')
-            lastaccess = lastaccess == 0 ? M.util.get_string('never', 'local_edwiserreports') : common.formatDate(new Date(lastaccess * 1000), "d MMM yyyy hh:mm TT");
+            lastaccess = lastaccess == 0 ? M.util.get_string('never', 'local_edwiserreports') : (rtl ? common.formatDate(new Date(lastaccess * 1000), "TT mm:hh  yyyy MMM d") : common.formatDate(new Date(lastaccess * 1000), "d MMM yyyy hh:mm TT"));
             $('.learner-course-activties-lastaccess').text(lastaccess);
             $('.learner-course-activties-lastaccess').css('display', 'inherit');
         }, 1500);
@@ -189,8 +192,14 @@ define('local_edwiserreports/reports/learnercourseactivities', [
                         {
                             data: 'completedon',
                             render: function(data) {
-                                return `<span class="d-none">${data}</span>` +
-                                    (data == 0 ? '-' : common.formatDate(new Date(data * 1000), "d MMM yyyy"));
+                                let tempdate = common.formatDate(new Date(data * 1000), "d MMM yyyy");
+                                let rtl = $('html').attr('dir') == 'rtl' ? 1 : 0
+
+                                if(rtl){
+                                    tempdate = common.formatDate(new Date(data * 1000), "yyyy MMM d");
+                                }
+                                return `<p class="erp-time-rtl"><span class="d-none">${data}</span>` +
+                                    (data == 0 ? '-' : tempdate) + '</p>';
                             },
                             width: "10rem"
                         },
@@ -198,8 +207,14 @@ define('local_edwiserreports/reports/learnercourseactivities', [
                         {
                             data: 'gradedon',
                             render: function(data) {
-                                return `<span class="d-none">${data}</span>` +
-                                    (data == 0 ? '-' : common.formatDate(new Date(data * 1000), "d MMM yyyy"));
+                                let tempdate = common.formatDate(new Date(data * 1000), "d MMM yyyy");
+                                let rtl = $('html').attr('dir') == 'rtl' ? 1 : 0
+
+                                if(rtl){
+                                    tempdate = common.formatDate(new Date(data * 1000), "yyyy MMM d");
+                                }
+                                return `<p class="erp-time-rtl"><span class="d-none">${data}</span>` +
+                                    (data == 0 ? '-' : tempdate) + '</p>';
                             },
                             width: "10rem"
                         },
@@ -209,16 +224,28 @@ define('local_edwiserreports/reports/learnercourseactivities', [
                         {
                             data: 'firstaccess',
                             render: function(data) {
-                                return `<span class="d-none">${data}</span>` +
-                                    (data == 0 ? never : common.formatDate(new Date(data * 1000), "d MMM yyyy hh:mm TT").substring(0,11) + '<br>' + common.formatDate(new Date(data * 1000), "d MMM yyyy hh:mm TT").substring(11,20));
+                                let tempdate = common.formatDate(new Date(data * 1000), "d MMM yyyy hh:mm TT").substring(0,11) + '<br>' + common.formatDate(new Date(data * 1000), "d MMM yyyy hh:mm TT").substring(11,20);
+                                let rtl = $('html').attr('dir') == 'rtl' ? 1 : 0
+
+                                if(rtl){
+                                    tempdate = common.formatDate(new Date(data * 1000), "TT mm:hh yyyy MMM d").substring(8, 20) + '<br>' + common.formatDate(new Date(data * 1000), "TT mm:hh yyyy MMM d").substring(0,8);
+                                }
+                                return `<p class="erp-time-rtl"><span class="d-none">${data}</span>` +
+                                    (data == 0 ? never : tempdate) + '</p>';
                             },
                             width: "10rem"
                         },
                         {
                             data: 'lastaccess',
                             render: function(data) {
-                                return `<span class="d-none">${data}</span>` +
-                                    (data == 0 ? never : common.formatDate(new Date(data * 1000), "d MMM yyyy hh:mm TT").substring(0,11) + '<br>' + common.formatDate(new Date(data * 1000), "d MMM yyyy hh:mm TT").substring(11,20));
+                                let tempdate = common.formatDate(new Date(data * 1000), "d MMM yyyy hh:mm TT").substring(0,11) + '<br>' + common.formatDate(new Date(data * 1000), "d MMM yyyy hh:mm TT").substring(11,20);
+                                let rtl = $('html').attr('dir') == 'rtl' ? 1 : 0
+
+                                if(rtl){
+                                    tempdate = common.formatDate(new Date(data * 1000), "TT mm:hh yyyy MMM d").substring(8, 20) + '<br>' + common.formatDate(new Date(data * 1000), "TT mm:hh yyyy MMM d").substring(0,8);
+                                }
+                                return `<p class="erp-time-rtl"><span class="d-none">${data}</span>` +
+                                    (data == 0 ? never : tempdate) + '</p>';
                             },
                             width: "10rem"
                         },
@@ -413,8 +440,11 @@ define('local_edwiserreports/reports/learnercourseactivities', [
                     .done(function(response) {
                         response = JSON.parse(response);
                         common.refreshSummarycard('group', response, SELECTOR.SUMMARY, function() {
+                            let rtl = $('html').attr('dir') == 'rtl' ? 1 : 0;
                             lastaccess = $('.learner-course-activties-lastaccess').data('date');
-                            lastaccess = lastaccess == 0 ? M.util.get_string('never', 'local_edwiserreports') : common.formatDate(new Date(lastaccess * 1000), "d MMM yyyy hh:mm TT");
+                            // M.util.get_string('tableinfo', 'local_edwiserreports')
+                            lastaccess = lastaccess == 0 ? M.util.get_string('never', 'local_edwiserreports') : (rtl ? common.formatDate(new Date(lastaccess * 1000), "TT mm:hh  yyyy MMM d") : common.formatDate(new Date(lastaccess * 1000), "d MMM yyyy hh:mm TT"));
+                            // lastaccess = lastaccess == 0 ? M.util.get_string('never', 'local_edwiserreports') : common.formatDate(new Date(lastaccess * 1000), "d MMM yyyy hh:mm TT");
                             $('.learner-course-activties-lastaccess').text(lastaccess);
                             $('.learner-course-activties-lastaccess').css('display', 'inherit');
                             // lastaccess = $('.learner-course-activties-lastaccess').data('date');
@@ -424,7 +454,10 @@ define('local_edwiserreports/reports/learnercourseactivities', [
 
                 setTimeout(function() {
                     lastaccess = $('.learner-course-activties-lastaccess').data('date');
-                    lastaccess = lastaccess == 0 ? M.util.get_string('never', 'local_edwiserreports') : common.formatDate(new Date(lastaccess * 1000), "d MMM yyyy hh:mm TT");
+                            // M.util.get_string('tableinfo', 'local_edwiserreports')
+                    lastaccess = lastaccess == 0 ? M.util.get_string('never', 'local_edwiserreports') : (rtl ? common.formatDate(new Date(lastaccess * 1000), "TT mm:hh  yyyy MMM d") : common.formatDate(new Date(lastaccess * 1000), "d MMM yyyy hh:mm TT"));
+                    // lastaccess = $('.learner-course-activties-lastaccess').data('date');
+                    // lastaccess = lastaccess == 0 ? M.util.get_string('never', 'local_edwiserreports') : common.formatDate(new Date(lastaccess * 1000), "d MMM yyyy hh:mm TT");
                     $('.learner-course-activties-lastaccess').text(lastaccess);
                     $('.learner-course-activties-lastaccess').css('display', 'inherit');
                 }, 1500);
@@ -476,7 +509,11 @@ define('local_edwiserreports/reports/learnercourseactivities', [
             
             setTimeout(function() {
                 lastaccess = $('.learner-course-activties-lastaccess').data('date');
-                lastaccess = lastaccess == 0 ? M.util.get_string('never', 'local_edwiserreports') : common.formatDate(new Date(lastaccess * 1000), "d MMM yyyy hh:mm TT");
+                            // M.util.get_string('tableinfo', 'local_edwiserreports')
+                lastaccess = lastaccess == 0 ? M.util.get_string('never', 'local_edwiserreports') : (rtl ? common.formatDate(new Date(lastaccess * 1000), "TT mm:hh  yyyy MMM d") : common.formatDate(new Date(lastaccess * 1000), "d MMM yyyy hh:mm TT"));
+                    
+                // lastaccess = $('.learner-course-activties-lastaccess').data('date');
+                // lastaccess = lastaccess == 0 ? M.util.get_string('never', 'local_edwiserreports') : common.formatDate(new Date(lastaccess * 1000), "d MMM yyyy hh:mm TT");
                 $('.learner-course-activties-lastaccess').text(lastaccess);
                 $('.learner-course-activties-lastaccess').css('display', 'inherit');
             }, 600);

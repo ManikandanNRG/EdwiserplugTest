@@ -281,7 +281,7 @@ function local_edwiserreports_output_fragment_get_reportscap_form($report) {
     );
     $output .= html_writer::end_tag('label');
     $output .= html_writer::end_tag('div');
-    $output .= html_writer::start_tag('div', array('class' => 'col-md-9 d-flex', 'style' => 'align-items: center;'));
+    $output .= html_writer::start_tag('div', array('class' => 'col-md-9', 'style' => 'align-items: center;'));
     $output .= html_writer::tag(
         'label',
         $capabilities[$capvalue],
@@ -346,11 +346,11 @@ function local_edwiserreports_output_fragment_get_blockscap_form($block) {
     );
     $output .= html_writer::end_tag('label');
     $output .= html_writer::end_tag('div');
-    $output .= html_writer::start_tag('div', array('class' => 'col-md-9 d-flex', 'style' => 'align-items: center;'));
+    $output .= html_writer::start_tag('div', array('class' => 'col-md-9 ', 'style' => 'align-items: center;'));
     $output .= html_writer::tag(
         'label',
         $capabilities[$capvalue],
-        array('class' => 'col-form-label h4 ' . ($single ? '' : 'd-none'))
+        array('class' => 'col-form-label h4 ' . ($single ? 'd-inline' : 'd-none'))
     );
     $output .= html_writer::select(
         $capabilities,
